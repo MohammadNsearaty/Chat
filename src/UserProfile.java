@@ -21,6 +21,14 @@ public class UserProfile implements Serializable {
         this.userId = userId;
     }
 
+    public String getName() {
+        return userName;
+    }
+
+    public void setName(String userName) {
+        this.userName = userName;
+    }
+
     UserProfile()
     {
         userName ="";

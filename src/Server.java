@@ -70,7 +70,14 @@ public class Server {
         list.add(user);
         return true;
     }
-    public boolean checkIfUserNameAvailable(String userName){return true;}
+    public boolean checkIfUserNameAvailable(String userName){
+        for(UserProfile er:list)
+        {
+            if(userName == er.getName())
+                return false;
+        }
+        return true;
+    }
     public boolean deleteUser(UserProfile user){return true;}
     public boolean updateUser(UserProfile user){return true;}
     public void rejectRequest(ArrayList<Object> list) throws IOException {
