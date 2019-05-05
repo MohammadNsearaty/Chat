@@ -15,14 +15,14 @@ public class Server {
     private ArrayList<Group> groupsList;
 
     private Socket connection;
-    private String emailsFileLocation ="C:\\Users\\Mohamad Nsearaty\\Desktop\\hangeFile";
-    private String hangedMessagesFileLocation ="C:\\Users\\Mohamad Nsearaty\\Desktop\\hangedMessages";
-    private String groupsFileLocation= "C:\\Users\\Mohamad Nsearaty\\Desktop\\groupsFile";
+    private String emailsFileLocation ="C:\\Users\\ASUS\\Desktop\\hangeFile";
+    private String hangedMessagesFileLocation ="C:\\Users\\ASUS\\Desktop\\hangedMessages";
+    private String groupsFileLocation= "C:\\Users\\ASUS\\Desktop\\groupsFile";
 
     public Server() throws IOException, ClassNotFoundException {
-        emailsFileLocation ="C:\\Users\\Mohamad Nsearaty\\Desktop\\hangeFile";
-        hangedMessagesFileLocation ="C:\\Users\\Mohamad Nsearaty\\Desktop\\hangedMessages";
-        groupsFileLocation= "C:\\Users\\Mohamad Nsearaty\\Desktop\\groupsFile";
+        emailsFileLocation ="C:\\Users\\ASUS\\Desktop\\hangeFile";
+        hangedMessagesFileLocation ="C:\\Users\\ASUS\\Desktop\\hangedMessages";
+        groupsFileLocation= "C:\\Users\\ASUS\\Desktop\\groupsFile";
 
         ObjectInputStream emailStream;
         ObjectInputStream messagesStream;
@@ -285,7 +285,7 @@ public class Server {
 
     //Set Up and run the server
     public void startRunning() throws IOException {
-        server = new ServerSocket(6789, 100);
+        server = new ServerSocket(6790, 101);
         while (true) {
             try {
                 WaitForConnection();  //wait someone to connect with me
