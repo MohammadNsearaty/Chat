@@ -15,14 +15,15 @@ public class Server {
     private ArrayList<Group> groupsList;
 
     private Socket connection;
-    private String emailsFileLocation ="C:\\Users\\ASUS\\Desktop\\hangeFile";
-    private String hangedMessagesFileLocation ="C:\\Users\\ASUS\\Desktop\\hangedMessages";
-    private String groupsFileLocation= "C:\\Users\\ASUS\\Desktop\\groupsFile";
+    boolean check =true;
+    private String emailsFileLocation ="C:\\Users\\asus--2018\\Desktop\\hangeFile";
+    private String hangedMessagesFileLocation ="C:\\Users\\asus--2018\\Desktop\\hangedMessages";
+    private String groupsFileLocation= "C:\\Users\\asus--2018\\Desktop\\groupsFile";
 
     public Server() throws IOException, ClassNotFoundException {
-        emailsFileLocation ="C:\\Users\\ASUS\\Desktop\\hangeFile";
-        hangedMessagesFileLocation ="C:\\Users\\ASUS\\Desktop\\hangedMessages";
-        groupsFileLocation= "C:\\Users\\ASUS\\Desktop\\groupsFile";
+        emailsFileLocation ="C:\\Users\\asus--2018\\Desktop\\hangeFile";
+        hangedMessagesFileLocation ="C:\\Users\\asus--2018\\Desktop\\hangedMessages";
+        groupsFileLocation= "C:\\Users\\asus--2018\\Desktop\\groupsFile";
 
         ObjectInputStream emailStream;
         ObjectInputStream messagesStream;
@@ -78,8 +79,28 @@ public class Server {
         }
         return true;
     }
-    public boolean deleteUser(UserProfile user){return true;}
-    public boolean updateUser(UserProfile user){return true;}
+    public boolean deleteUser(UserProfile user){
+        if(checkIfUserNameAvailable(user.getName()))
+            return false;
+        list.remove(user);
+        return true;
+
+    }
+    public boolean updateUser(UserProfile user){
+        if(checkIfUserNameAvailable(user.getName()))
+            return false;
+        for(UserProfile er:list)
+        {
+            if(er.getUserId() == user.getUserId())
+            {
+                list.remove(er);
+                list.add(user);
+            }
+        }
+        return false;
+
+
+    }
     public void rejectRequest(ArrayList<Object> list) throws IOException {
         ArrayList<Object> arrayList = new ArrayList<>();
         arrayList.add(list.get(0));
@@ -134,6 +155,9 @@ public class Server {
     public void hangMessage(Message message){
         messagelist.add(message);
     }
+
+    public void hangUserMessages(ArrayList<Message> messages){ messagelist = messages; }
+
     public Message freeMessage(String messageId){
 
         for(Message message:messagelist)
@@ -146,6 +170,8 @@ public class Server {
         }
         return null;
     }
+
+
     public ArrayList<Message> searchInHangedMessages(String userId)
     {
         ArrayList<Message> userMessages = new ArrayList<>();
@@ -168,6 +194,29 @@ public class Server {
 
         return userProfile;
     }
+
+    public Group serilaizegroupObject(ArrayList<Object> arrayList)
+    {
+        Group group = new Group();
+
+        group.setName((String) arrayList.get(1));
+        group.setId("aa25");
+
+
+        return group;
+    }
+
+    public Message serilaizemessageObject(ArrayList<Object> arrayList)
+    {
+        Message message = new Message();
+
+        message.setType((messageType) arrayList.get(1));
+        message.setMessageID("25");
+
+
+        return message;
+    }
+
     public UserProfile searchInUsersList(String Email) {
 
         for(UserProfile profile:list) {
@@ -203,64 +252,68 @@ public class Server {
                 else
                     rejectRequest(list);
             }
-            /*
-            case DELETE_USER:
+            case 2: //DELETE_USER
             {
-               if(!deleteUser((UserProfile) request.getObject())){
-                   rejectRequest(request);
-               }
-               else
-                   successfulRequest(request);
+                UserProfile userProfile = serilaizeProfileObject(list);
+                if (!deleteUser(userProfile)) {
+                    rejectRequest(list);
+                } else
+                    successfulRequest(list);
                 break;
             }
-            case UPDATE_USER:
+            case 3: //UPDATE_USER
             {
-                updateUser((UserProfile) request.getObject());
-                successfulRequest(request);
+                UserProfile userProfile = serilaizeProfileObject(list);
+                updateUser(userProfile) ;
+                successfulRequest(list);
             }
-            case CREATE_GROUP:
+            case 4: //CREATE_GROUP
             {
-                if(!createGroup((Group) request.getObject()))
-                    rejectRequest(request);
+                Group group = serilaizegroupObject(list);
+                if (!createGroup(group) )
+                    rejectRequest(list);
                 else
-                    successfulRequest(request);
+                    successfulRequest(list);
                 break;
             }
-            case DELETE_GROUP:
+            case 5: //DELETE_GROUP
             {
-                if(!deleteGroup((Group) request.getObject()))
-                    rejectRequest(request);
+                Group group = serilaizegroupObject(list);
+                if (!deleteGroup(group))
+                    rejectRequest(list);
                 else
-                    successfulRequest(request);
+                    successfulRequest(list);
                 break;
             }
-            case UPDATE_GROUP:
+            case 6: //UPDATE_GROUP
             {
-                if(!updateGroup((Group) request.getObject()))
-                    rejectRequest(request);
+                Group group = serilaizegroupObject(list);
+                if (!updateGroup(group))
+                    rejectRequest(list);
                 else
-                    successfulRequest(request);
+                    successfulRequest(list);
                 break;
             }
-            case SEND_MESSAGE:
+            case 7: //SEND_MESSAGE
             {
-                hangMessage((Message) request.getObject());
-                successfulRequest(request);
+                Message message =  serilaizemessageObject(list);
+                hangMessage((message));
+                successfulRequest(list);
             }
-            case CHECK_HANGED_MESSAGES:
+            case 8: //CHECK_HANGED_MESSAGES
             {
-                ArrayList<Message> userMessages = searchInHangedMessages((String) request.getObject());
-                if(userMessages.size() == 0)
-                    rejectRequest(request);
-                else
-                {
-                    request.setObject(userMessages);
-                    output.writeObject(request);
-                    output.flush();
+                Message message =  serilaizemessageObject(list);
+                ArrayList<Message> userMessages = searchInHangedMessages(message.getMessageID());
+                if (userMessages.size() == 0)
+                    rejectRequest(list);
+                else {
+                    hangUserMessages(userMessages);
+                    successfulRequest(list);
                 }
-            }*/
+
             }
         }
+    }
 
     public String getEmailsFileLocation() {
         return emailsFileLocation;
@@ -312,10 +365,26 @@ public class Server {
 
     //wait for connection then display connection information
     private void WaitForConnection()throws IOException{
-        System.out.println("Waiting for someone to connect...");
+        ///***
+        ArrayList<Object> LogInfo;
+        ///***
         connection = server.accept(); // to accept any one want to chat with you
-    }
+        System.out.println("Waiting for someone to connect...");
+        ///****
+        try {
 
+            input.readObject();
+            LogInfo = (ArrayList<Object>) input.readObject();
+            System.out.println(LogInfo);
+            UserProfile userProfile = serilaizeProfileObject(LogInfo);
+            logIn(userProfile);
+
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        ///*****
+    }
     //make the stream to send and receive the message
     private void SetUpStream()throws IOException{
 
@@ -349,7 +418,21 @@ public class Server {
         //} while (!message[0].equals("CLIENT - END")); // the while will excite until any one type END then the chat will stop here we deal with Just String
 
     }
+    public void logIn(UserProfile user) throws Exception {
 
+
+        for (int i = 0; i < list.size(); i++) {
+
+            if ((list.get(i).getUserName().equals(user.getUserName())) && (list.get(i).getUserPassword().equals(user.getUserPassword()))) {
+
+                System.out.println("Welcome, " + user);
+            } else {
+                System.out.println("Login Failed");
+            }
+
+
+        }
+    }
 
     //Send Message to client
     public void SendMessage(String message){

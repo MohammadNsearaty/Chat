@@ -29,6 +29,10 @@ public class UserProfile implements Serializable {
         this.userName = userName;
     }
 
+    public String getUserPassword() { return password; }
+
+    public void setUserPassword(String password){ this.password = password; }
+
     UserProfile()
     {
         userName ="";
