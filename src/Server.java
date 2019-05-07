@@ -243,14 +243,20 @@ public class Server {
             case 1://sign in
             {
                 if (checkIfUserNameAvailable((String) list.get(1))) {
-                   if(searchInUsersList((String) list.get(1)) != null) {
-                       successfulRequest(list);
-                   }
-                   else
-                       rejectRequest(list);
+                    if (searchInUsersList((String) list.get(1)) != null) {
+
+                        try {
+                            UserProfile userProfile = serilaizeProfileObject(list);
+                            logIn(userProfile);
+
+                        } catch (Exception e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                        successfulRequest(list);
+                    } else
+                        rejectRequest(list);
                 }
-                else
-                    rejectRequest(list);
             }
             case 2: //DELETE_USER
             {
@@ -365,15 +371,12 @@ public class Server {
 
     //wait for connection then display connection information
     private void WaitForConnection()throws IOException{
-        ///***
-        ArrayList<Object> LogInfo;
-        ///***
-        System.out.println("Waiting for someone to connect...");
 
         connection = server.accept(); // to accept any one want to chat with you
-        ///****
+        System.out.println("Waiting for someone to connect...");
+      /*  ///****
         try {
-
+            ArrayList<Object> LogInfo;
             input.readObject();
             LogInfo = (ArrayList<Object>) input.readObject();
             System.out.println(LogInfo);
@@ -384,7 +387,7 @@ public class Server {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        ///*****
+       */ ///*****
     }
     //make the stream to send and receive the message
     private void SetUpStream()throws IOException{
@@ -427,6 +430,7 @@ public class Server {
             if ((list.get(i).getUserName().equals(user.getUserName())) && (list.get(i).getUserPassword().equals(user.getUserPassword()))) {
 
                 System.out.println("Welcome, " + user);
+                list.add(user);
             } else {
                 System.out.println("Login Failed");
             }
