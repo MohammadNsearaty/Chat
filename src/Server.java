@@ -243,23 +243,20 @@ public class Server {
             case 1://sign in
             {
                 if (checkIfUserNameAvailable((String) list.get(1))) {
-                   if(searchInUsersList((String) list.get(1)) != null) {
+                    if (searchInUsersList((String) list.get(1)) != null) {
 
-                       try {
-                           UserProfile userProfile = serilaizeProfileObject(list);
-                           logIn(userProfile);
+                        try {
+                            UserProfile userProfile = serilaizeProfileObject(list);
+                            logIn(userProfile);
 
-                       } catch (Exception e) {
-                           // TODO Auto-generated catch block
-                           e.printStackTrace();
-                       }
-                       successfulRequest(list);
-                   }
-                   else
-                       rejectRequest(list);
+                        } catch (Exception e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                        successfulRequest(list);
+                    } else
+                        rejectRequest(list);
                 }
-                else
-                    rejectRequest(list);
             }
             case 2: //DELETE_USER
             {
