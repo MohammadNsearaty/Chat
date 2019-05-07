@@ -345,7 +345,7 @@ public class Server {
 
     //Set Up and run the server
     public void startRunning() throws IOException {
-        server = new ServerSocket(6790, 101);
+        server = new ServerSocket(6789, 101);
         while (true) {
             try {
                 WaitForConnection();  //wait someone to connect with me
