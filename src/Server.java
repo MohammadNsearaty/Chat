@@ -16,14 +16,14 @@ public class Server {
 
     private Socket connection;
     boolean check =true;
-    private String emailsFileLocation ="C:\\Users\\asus--2018\\Desktop\\hangeFile";
-    private String hangedMessagesFileLocation ="C:\\Users\\asus--2018\\Desktop\\hangedMessages";
-    private String groupsFileLocation= "C:\\Users\\asus--2018\\Desktop\\groupsFile";
+    private String emailsFileLocation ="hangeFile";
+    private String hangedMessagesFileLocation ="hangedMessages";
+    private String groupsFileLocation= "groupsFile";
 
     public Server() throws IOException, ClassNotFoundException {
-        emailsFileLocation ="C:\\Users\\asus--2018\\Desktop\\hangeFile";
-        hangedMessagesFileLocation ="C:\\Users\\asus--2018\\Desktop\\hangedMessages";
-        groupsFileLocation= "C:\\Users\\asus--2018\\Desktop\\groupsFile";
+        emailsFileLocation ="hangeFile";
+        hangedMessagesFileLocation ="hangedMessages";
+        groupsFileLocation= "groupsFile";
 
         ObjectInputStream emailStream;
         ObjectInputStream messagesStream;
