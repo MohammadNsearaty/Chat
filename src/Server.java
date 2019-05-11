@@ -351,7 +351,7 @@ public class Server {
 
     //Set Up and run the server
     public void startRunning() throws IOException {
-        server = new ServerSocket(6790, 101);
+        server = new ServerSocket(6790, 100);
         while (true) {
             try {
                 WaitForConnection();  //wait someone to connect with me
@@ -371,9 +371,11 @@ public class Server {
 
     //wait for connection then display connection information
     private void WaitForConnection()throws IOException{
+        System.out.println("Waiting for someone to connect...");
 
         connection = server.accept(); // to accept any one want to chat with you
-        System.out.println("Waiting for someone to connect...");
+
+        System.out.println("connected");
       /*  ///****
         try {
             ArrayList<Object> LogInfo;
