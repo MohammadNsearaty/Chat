@@ -16,7 +16,7 @@ public class Server {
 
     private Socket connection;
     boolean check =true;
-    private String emailsFileLocation ="hangeFile";
+    private String emailsFileLocation ="h" + "angeFile";
     private String hangedMessagesFileLocation ="hangedMessages";
     private String groupsFileLocation= "groupsFile";
 
@@ -31,24 +31,54 @@ public class Server {
         File file1 = new File(emailsFileLocation);
         File file2 = new File(hangedMessagesFileLocation);
         File file3 = new File(groupsFileLocation);
+
         if(!file1.exists())
-           file1.createNewFile();
+            file1.createNewFile();
         if(!file2.exists())
             file2.createNewFile();
         if(!file3.exists())
             file3.createNewFile();
 
+        System.out.println("file1"+file1.exists());
+        System.out.println("file2"+file2.exists());
+        System.out.println("file3"+file3.exists());
+
         FileInputStream emailFile = new FileInputStream(file1);
         FileInputStream messagesFile = new FileInputStream(file2);
         FileInputStream groupFile = new FileInputStream(file3);
 
-
-        if(emailFile.available() == 1)
-        {
+        if(file1.exists()){
             emailStream = new ObjectInputStream(emailFile);
-            list = (ArrayList<UserProfile>) emailStream.readObject();
+            list = (ArrayList<UserProfile>) emailStream.readObject(); //nserat
         }
-        if(messagesFile.available() == 1)
+
+      //  if(file1.exists()) {
+
+    //        emailStream = new ObjectInputStream(emailFile);
+        //    list = (ArrayList<UserProfile>) emailStream.readObject(); //nserat
+         //   System.out.println("list:"+list.get(0).getEmail());
+   //     }
+
+        //  if(file2.exists())
+
+        //   if(file3.exists())
+
+
+        //System.out.println("akakaka"+emailFile.available());
+       /* if(emailFile.available() == 1)
+        {
+
+            emailStream = new ObjectInputStream(emailFile);
+         //   while(file1.canRead()) {
+                list = (ArrayList<UserProfile>) emailStream.readObject(); //nserat
+              //  list.add((UserProfile)emailStream.readObject());  //here
+
+            }*/
+         //   list.add((UserProfile)emailStream.readObject());  //here
+
+
+       // }
+     /*   if(messagesFile.available() == 1)
         {
             messagesStream = new ObjectInputStream(messagesFile);
             messagelist = (ArrayList<Message>) messagesStream.readObject();
@@ -57,18 +87,22 @@ public class Server {
         {
             groupStream = new ObjectInputStream(groupFile);
             groupsList = (ArrayList<Group>) groupStream.readObject();
-        }
+        }*/
     }
 
 
 
     public boolean addUser(UserProfile user){
-        for(int i =0 ; i < list.size() ;i++)
-        {
-            if(list.get(i).getEmail().equals(user.getEmail()))
-                return false;
+        if(list==null) {
+            list.add(user);
+        }else {
+            for (int i = 0; i < list.size(); i++) {
+                if (list.get(i).getEmail().equals(user.getEmail()))
+                    return false;
+            }
+            list.add(user);
         }
-        list.add(user);
+        System.out.println("list is: ababa"+list.toString());  ///////////
         return true;
     }
     public boolean checkIfUserNameAvailable(String userName){
@@ -108,10 +142,19 @@ public class Server {
         output.writeObject(arrayList);
         output.flush();
     }
-    public void successfulRequest(ArrayList<Object> list) throws IOException {
+    public void successfulRequest(ArrayList<Object> list) throws IOException {  //HERE WE SEND THE DATA TO CLIENT
         ArrayList<Object> arrayList = new ArrayList<>();
         UserProfile profile = serilaizeProfileObject(list);
         addUser(profile);
+        arrayList.add(list.get(0));
+        arrayList.add(true);
+        arrayList.add("abc123");//Test Id
+        output.writeObject(arrayList);
+        output.flush();
+    }
+
+    public void successfulRequestForSignIn(ArrayList<Object> list) throws IOException {
+        ArrayList<Object> arrayList = new ArrayList<>();
         arrayList.add(list.get(0));
         arrayList.add(true);
         arrayList.add("abc123");//Test Id
@@ -126,7 +169,7 @@ public class Server {
     }
     public boolean deleteGroup(Group group){
         if(checkIfGroupNameAvaillabe(group.getName()))
-           return false;
+            return false;
         groupsList.remove(group);
         return true;
     }
@@ -146,8 +189,8 @@ public class Server {
     public boolean checkIfGroupNameAvaillabe(String groupName){
         for(Group gr:groupsList)
         {
-           if(groupName ==gr.getName())
-               return false;
+            if(groupName ==gr.getName())
+                return false;
         }
         return true;
     }
@@ -191,9 +234,20 @@ public class Server {
         userProfile.setJoinDate((Date)arrayList.get(5));
         userProfile.setUserId("abc123");
 
-
         return userProfile;
     }
+
+    public UserProfile serilaizeSignInInfo(ArrayList<Object> arrayList){  //here
+
+        UserProfile userProfile = new UserProfile();
+
+        userProfile.setEmail((String)arrayList.get(1));
+        userProfile.setPassword((String)arrayList.get(2));
+
+        return userProfile;
+
+    }
+
 
     public Group serilaizegroupObject(ArrayList<Object> arrayList)
     {
@@ -218,10 +272,14 @@ public class Server {
     }
 
     public UserProfile searchInUsersList(String Email) {
-
+        System.out.println("list is:"+list);
+        System.out.println("size is:"+list.size());
+        //System.out.println("list[2]:"+list.get(2).getEmail());
+        int i=0;
         for(UserProfile profile:list) {
-        if(profile.getEmail().equals(Email))
-            return profile;
+            System.out.println("Email is:"+list.get(i).getEmail());
+            if(profile.getEmail().equals(Email))
+                return profile;
         }
         return null;
     }
@@ -237,26 +295,33 @@ public class Server {
                     rejectRequest(list);
                 }
                 else
-                   successfulRequest(list);
+                    successfulRequest(list);
                 break;
             }
             case 1://sign in
             {
-                if (checkIfUserNameAvailable((String) list.get(1))) {
-                    if (searchInUsersList((String) list.get(1)) != null) {
+                if (searchInUsersList((String) list.get(1)) != null) {
+                    // if () {
 
-                        try {
-                            UserProfile userProfile = serilaizeProfileObject(list);
-                            logIn(userProfile);
-
-                        } catch (Exception e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                    try {
+                        System.out.println("abababa");
+                        UserProfile userProfile = serilaizeSignInInfo(list);
+                        boolean bool = logIn(userProfile,list);
+                        if(bool){
+                            successfulRequestForSignIn(list);
                         }
-                        successfulRequest(list);
-                    } else
-                        rejectRequest(list);
-                }
+                        else{
+                            rejectRequest(list);
+                        }
+
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    successfulRequest(list);
+                } else
+                    rejectRequest(list);
+                // }
             }
             case 2: //DELETE_USER
             {
@@ -351,7 +416,11 @@ public class Server {
 
     //Set Up and run the server
     public void startRunning() throws IOException {
+//<<<<<<< HEAD
         server = new ServerSocket(6789, 101);
+//=======
+        //       server = new ServerSocket(6790, 100);
+//>>>>>>> origin/master
         while (true) {
             try {
                 WaitForConnection();  //wait someone to connect with me
@@ -371,9 +440,11 @@ public class Server {
 
     //wait for connection then display connection information
     private void WaitForConnection()throws IOException{
+        System.out.println("Waiting for someone to connect...");
 
         connection = server.accept(); // to accept any one want to chat with you
-        System.out.println("Waiting for someone to connect...");
+
+        System.out.println("connected");
       /*  ///****
         try {
             ArrayList<Object> LogInfo;
@@ -397,6 +468,8 @@ public class Server {
         input = new ObjectInputStream(connection.getInputStream());
         output.writeObject(null);
         System.out.println("The Stream Is Ready");
+
+
     }
 
     //The function will execute during the chat
@@ -411,38 +484,38 @@ public class Server {
         //final String message[] = {""};
         ArrayList<Object> recieveMessage;
         input.readObject();
-       // do { //have a conversation
-           recieveMessage = (ArrayList<Object>) input.readObject();
-            System.out.println(recieveMessage);
-           //if(recieveMessage!=)
-           //{
-               handleRequest(recieveMessage);
-          // }
+        // do { //have a conversation
+        recieveMessage = (ArrayList<Object>) input.readObject();
+        System.out.println(recieveMessage);
+        //if(recieveMessage!=)
+        //{
+        handleRequest(recieveMessage);
+        // }
 
         //} while (!message[0].equals("CLIENT - END")); // the while will excite until any one type END then the chat will stop here we deal with Just String
 
     }
-    public void logIn(UserProfile user) throws Exception {
+    public boolean logIn(UserProfile user,ArrayList<Object> listInfo) throws Exception {
 
 
-        for (int i = 0; i < list.size(); i++) {
-
-            if ((list.get(i).getUserName().equals(user.getUserName())) && (list.get(i).getUserPassword().equals(user.getUserPassword()))) {
-
-                System.out.println("Welcome, " + user);
-                list.add(user);
-            } else {
-                System.out.println("Login Failed");
-            }
+        // for (int i = 0; i < list.size(); i++) {
 
 
+        if ((user.getUserPassword().equals(listInfo.get(2)))) {
+            System.out.println("Welcome, " + user);
+            //   list.add(user);
+            return true;
+        } else {
+            System.out.println("Login Failed");
+            return false;
         }
+
     }
 
     //Send Message to client
     public void SendMessage(String message){
         try{
-         //   System.out.println("SendMessage() was called");
+            //   System.out.println("SendMessage() was called");
             System.out.println("Server - "+message);
             output.writeObject("SERVER - "+message); //send message throw the output stream
             output.flush();
