@@ -568,13 +568,16 @@ public class Server {
             input.close();
             connection.close();
             File emailFile = new File(emailsFileLocation);
-            emailFile.createNewFile();
+            if(!emailFile.exists())
+                emailFile.createNewFile();
 
             File hangeFile = new File(hangedMessagesFileLocation);
-            hangeFile.createNewFile();
+            if(!hangeFile.exists())
+                hangeFile.createNewFile();
 
             File groupFile = new File(groupsFileLocation);
-            groupFile.createNewFile();
+            if(!groupFile.exists())
+                groupFile.createNewFile();
 
 
             FileOutputStream hangeStream = new FileOutputStream(hangeFile);
