@@ -12,6 +12,17 @@ public class UserProfile implements Serializable {
     private Date joinDate;
     private ArrayList<Message> currMessages;
     private String userId;
+    private String story;
+
+    public String getStory() {
+        return story;
+    }
+
+    public void setStory(String story2) {
+        story = story2;
+    }
+
+
 
     public String getUserId() {
         return userId;
@@ -43,6 +54,7 @@ public class UserProfile implements Serializable {
         blockList = new ArrayList<>();
         joinDate = new Date();
         currMessages = new ArrayList<>();
+        story = "";
     }
 
 

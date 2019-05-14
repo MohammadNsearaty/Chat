@@ -159,6 +159,7 @@ public class Server {
         arrayList.add(list.get(0));
         arrayList.add(true);
         arrayList.add("abc123");//Test Id
+        arrayList.add(list.get(1));
         output.writeObject(arrayList);
         output.flush();
     }
@@ -294,112 +295,151 @@ public class Server {
         return null;
     }
 
-    public void handleRequest(ArrayList<Object> list) throws IOException {
-        int type = (int) list.get(0);
+    public void handleRequest(ArrayList<Object> list2) throws IOException {
+        int type = (int) list2.get(0);
         switch (type) {
             case 0://Add user
             {
-                UserProfile userProfile = serilaizeProfileObject(list);
+                UserProfile userProfile = serilaizeProfileObject(list2);
                 if (!addUser(userProfile)) {
-                    rejectRequest(list);
+                    rejectRequest(list2);
                 } else
-                    successfulRequest(list);
+                    successfulRequest(list2);
                 break;
             }
             case 1://sign in
             {
-                if (searchInUsersList((String) list.get(1)) != null) {
+                if (searchInUsersList((String) list2.get(1)) != null) {
 
                     try {
                         System.out.println("abababa");
-                        UserProfile userProfile = serilaizeSignInInfo(list);
-                        boolean bool = logIn(userProfile,list);
+                        UserProfile userProfile = serilaizeSignInInfo(list2);
+                        boolean bool = logIn(userProfile,list2);
                         if (bool) {
-                            successfulRequestForSignIn(list);
+                            successfulRequestForSignIn(list2);
                         } else {
-                            rejectRequest(list);
+                            rejectRequest(list2);
                         }
 
                     } catch (Exception e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
-                    successfulRequest(list);
+                    successfulRequest(list2);
                 } else
-                    rejectRequest(list);
+                    rejectRequest(list2);
                 // }
             }
             case 2: //DELETE_USER
             {
-                UserProfile userProfile = serilaizeProfileObject(list);
+                UserProfile userProfile = serilaizeProfileObject(list2);
                 if (!deleteUser(userProfile)) {
-                    rejectRequest(list);
+                    rejectRequest(list2);
                 } else
-                    successfulRequest(list);
+                    successfulRequest(list2);
                 break;
             }
             case 3: //UPDATE_USER
             {
-                UserProfile userProfile = serilaizeProfileObject(list);
+                UserProfile userProfile = serilaizeProfileObject(list2);
                 updateUser(userProfile);
-                successfulRequest(list);
+                successfulRequest(list2);
             }
             case 4: //Send The list user
             {
-                if(list!=null) {
-                    successfulRequestForFriendList(list);
+                if(list2!=null) {
+                    successfulRequestForFriendList(list2);
                 }else{
-                    rejectRequest(list);
+                    rejectRequest(list2);
                 }
 
             }
+            case 5:
+            {
+                if(list!=null){
+                    boolean bool = CheckTheUserList(list2);
+                    if (bool){
+                        successfulRequestForEditInfo(list2);
+                    }else{
+                        rejectRequest(list2);
+                    }
+                }
+            }
 
-            case 5: //DELETE_GROUP
+            case 6: //DELETE_GROUP
             {
-                Group group = serilaizegroupObject(list);
+                Group group = serilaizegroupObject(list2);
                 if (!deleteGroup(group))
-                    rejectRequest(list);
+                    rejectRequest(list2);
                 else
-                    successfulRequest(list);
+                    successfulRequest(list2);
                 break;
             }
-            case 6: //UPDATE_GROUP
+            case 7: //UPDATE_GROUP
             {
-                Group group = serilaizegroupObject(list);
+                Group group = serilaizegroupObject(list2);
                 if (!updateGroup(group))
-                    rejectRequest(list);
+                    rejectRequest(list2);
                 else
-                    successfulRequest(list);
+                    successfulRequest(list2);
                 break;
             }
-            case 7: //SEND_MESSAGE
+            case 8: //SEND_MESSAGE
             {
-                Message message = serilaizemessageObject(list);
+                Message message = serilaizemessageObject(list2);
                 hangMessage((message));
-                successfulRequest(list);
+                successfulRequest(list2);
             }
-            case 8: //CHECK_HANGED_MESSAGES
+            case 9: //CHECK_HANGED_MESSAGES
             {
-                Message message = serilaizemessageObject(list);
+                Message message = serilaizemessageObject(list2);
                 ArrayList<Message> userMessages = searchInHangedMessages(message.getMessageID());
                 if (userMessages.size() == 0)
-                    rejectRequest(list);
+                    rejectRequest(list2);
                 else {
                     hangUserMessages(userMessages);
-                    successfulRequest(list);
+                    successfulRequest(list2);
                 }
 
             }
-            case 9: //CREATE_GROUP
+            case 10: //CREATE_GROUP
             {
-                Group group = serilaizegroupObject(list);
+                Group group = serilaizegroupObject(list2);
                 if (!createGroup(group))
-                    rejectRequest(list);
+                    rejectRequest(list2);
                 else
-                    successfulRequest(list);
+                    successfulRequest(list2);
                 break;
             }
         }
+    }
+
+    private void successfulRequestForEditInfo(ArrayList<Object> list2) throws IOException {
+        ArrayList<Object> arrayList = new ArrayList<>();
+        arrayList.add(list.get(0));
+        arrayList.add(true);
+        arrayList.add(list.get(1));
+        output.writeObject(arrayList);
+        output.flush();
+
+    }
+
+    public boolean CheckTheUserList(ArrayList<Object> list2) {
+        boolean bool = false;
+        for(int i =0 ; i<list.size();i++){
+            if(list.get(i).getEmail().equals(list2.get(1)))
+            {
+                list.get(i).setStory((String)list2.get(2));
+                list.get(i).setUserName((String)list2.get(3));
+                bool = true;
+            }
+            else{
+                System.out.println("Login Failed");
+                bool = false;
+            }
+
+        }
+        return bool;
     }
 
     public String getEmailsFileLocation() {
