@@ -166,12 +166,17 @@ public class Server {
 
     public void successfulRequestForFriendList(ArrayList<Object> lists) throws IOException{
 
+        int x =0;
         ArrayList<Object> arrayList = new ArrayList<>();
         arrayList.add(lists.get(0));
         arrayList.add(true);
         for (int i =0;i<list.size();i++){
-            arrayList.add(list.get(i));
+            arrayList.add(list.get(i).getName());
+            arrayList.add(list.get(i).getEmail());
+            arrayList.add(list.get(i).getStory());
+            x++;
         }
+        arrayList.add(x);
         output.writeObject(arrayList);
         output.flush();
     }
@@ -309,12 +314,10 @@ public class Server {
             }
             case 1://sign in
             {
-                if (searchInUsersList((String) list2.get(1)) != null) {
-
                     try {
                         System.out.println("abababa");
                         UserProfile userProfile = serilaizeSignInInfo(list2);
-                        boolean bool = logIn(userProfile,list2);
+                        boolean bool = logIn(userProfile);
                         if (bool) {
                             successfulRequestForSignIn(list2);
                         } else {
@@ -325,10 +328,9 @@ public class Server {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
-                    successfulRequest(list2);
-                } else
-                    rejectRequest(list2);
-                // }
+                  //  successfulRequest(list2);
+
+                break;
             }
             case 2: //DELETE_USER
             {
@@ -344,6 +346,7 @@ public class Server {
                 UserProfile userProfile = serilaizeProfileObject(list2);
                 updateUser(userProfile);
                 successfulRequest(list2);
+                break;
             }
             case 4: //Send The list user
             {
@@ -353,8 +356,9 @@ public class Server {
                     rejectRequest(list2);
                 }
 
+                break;
             }
-            case 5:
+            case 5:  //Edit Info of the User
             {
                 if(list!=null){
                     boolean bool = CheckTheUserList(list2);
@@ -364,6 +368,7 @@ public class Server {
                         rejectRequest(list2);
                     }
                 }
+                break;
             }
 
             case 6: //DELETE_GROUP
@@ -389,6 +394,7 @@ public class Server {
                 Message message = serilaizemessageObject(list2);
                 hangMessage((message));
                 successfulRequest(list2);
+                break;
             }
             case 9: //CHECK_HANGED_MESSAGES
             {
@@ -400,6 +406,7 @@ public class Server {
                     hangUserMessages(userMessages);
                     successfulRequest(list2);
                 }
+                break;
 
             }
             case 10: //CREATE_GROUP
@@ -416,9 +423,9 @@ public class Server {
 
     private void successfulRequestForEditInfo(ArrayList<Object> list2) throws IOException {
         ArrayList<Object> arrayList = new ArrayList<>();
-        arrayList.add(list.get(0));
+        arrayList.add(list2.get(0));
         arrayList.add(true);
-        arrayList.add(list.get(1));
+        arrayList.add(list2.get(1));
         output.writeObject(arrayList);
         output.flush();
 
@@ -429,8 +436,8 @@ public class Server {
         for(int i =0 ; i<list.size();i++){
             if(list.get(i).getEmail().equals(list2.get(1)))
             {
-                list.get(i).setStory((String)list2.get(2));
-                list.get(i).setUserName((String)list2.get(3));
+                list.get(i).setStory((String)list2.get(3));
+                list.get(i).setName((String)list2.get(2));
                 bool = true;
             }
             else{
@@ -551,7 +558,7 @@ public class Server {
 
     }
 
-    public boolean logIn(UserProfile user, ArrayList<Object> listInfo) throws Exception {
+    public boolean logIn(UserProfile user) throws Exception {
 
         boolean bool = false;
 
