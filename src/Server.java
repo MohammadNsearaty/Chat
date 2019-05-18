@@ -10,6 +10,7 @@ public class Server {
     private ObjectInputStream input;
     private ServerSocket server;
 
+
     private ArrayList<UserProfile> list = new ArrayList<>();
     private ArrayList<Message> messagelist;
     private ArrayList<Group> groupsList;
@@ -331,11 +332,36 @@ public class Server {
                 } else
                     successfulRequest(list);
                 break;
+                /*{
+
+                    }*/
             }
             case 3: //UPDATE_USER
             {
-                UserProfile userProfile = serilaizeProfileObject(list);
-                updateUser(userProfile) ;
+                UserProfile userProfil = serilaizeProfileObject(list);
+                UserProfile user=serilaizeProfileObject(list);
+                     /* if (! serilaizeSignInInfo(userProfile))
+                        {   boolean User = logIn(userProfile,list);
+                        if(User){
+                            successfulRequestForSignIn(list);
+                        }
+                        else{
+                            rejectRequest(list);
+                        }
+                     }
+                   else
+                       {   if(userProfil.getUserId() == user.getUserId())
+                     {
+                     for (int i = 0; i < list.size(); i++) {
+                if (list.get(i).getEmail().equals(user.getEmail()) ||
+                list.get(i).getName().equals(user.getName())||
+                   list.get(i).getUserPassword().equals(user.getUserPassword()))
+                {
+                          list.remove(userProfile);
+                          list.add(user);
+                }
+                 */
+                updateUser(userProfil) ;
                 successfulRequest(list);
             }
             case 4: //CREATE_GROUP
