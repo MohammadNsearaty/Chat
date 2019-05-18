@@ -166,17 +166,16 @@ public class Server {
 
     public void successfulRequestForFriendList(ArrayList<Object> lists) throws IOException{
 
-        int x =0;
+
         ArrayList<Object> arrayList = new ArrayList<>();
         arrayList.add(lists.get(0));
         arrayList.add(true);
+        arrayList.add((int)list.size());
         for (int i =0;i<list.size();i++){
             arrayList.add(list.get(i).getName());
             arrayList.add(list.get(i).getEmail());
-            arrayList.add(list.get(i).getStory());
-            x++;
         }
-        arrayList.add(x);
+
         output.writeObject(arrayList);
         output.flush();
     }
@@ -350,7 +349,7 @@ public class Server {
             }
             case 4: //Send The list user
             {
-                if(list2!=null) {
+                if(list!=null) {   //check here the condistion
                     successfulRequestForFriendList(list2);
                 }else{
                     rejectRequest(list2);
@@ -478,7 +477,7 @@ public class Server {
     //Set Up and run the server
     public void startRunning() throws IOException {
 //<<<<<<< HEAD
-        server = new ServerSocket(6789, 101);
+        server = new ServerSocket(6790, 101);
 //=======
         //       server = new ServerSocket(6790, 100);
 //>>>>>>> origin/master
