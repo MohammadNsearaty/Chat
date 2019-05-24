@@ -472,21 +472,20 @@ public class Server {
     private boolean CheckUserListFriendOfUserToBlock(ArrayList<Object> list2) {
         boolean bool = false;
         for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).equals(list2.get(1))) { ////////////// here the mistake
+            if (list2.get(1).equals(list.get(i).getEmail())) {
                 for (int j = 0; j < list.get(i).getUserFriends().size(); j++) {
                     if (list.get(i).getUserFriends().get(j).equals(list2.get(2)) && !list.get(i).searchInBlockList((String) list2.get(2))) {
                         list.get(i).blockUser((String) list2.get(2));
+                        list.get(i).getUserFriends().remove(j);
                         bool = true;
-                        return bool;
-
-                    } else {
-                        bool = false;
                         return bool;
                     }
                 }
+                System.out.println("The Block List of the User is :"+list.get(i).getBlockList());
+                System.out.println("The UserList Friend After Block is :"+list.get(i).getUserFriends());
             }
         }
-        return false;
+        return bool;
     }
 
     private void successfulRequestForRemoveFriend(ArrayList<Object> list2) throws IOException {
@@ -558,7 +557,8 @@ public class Server {
             if (list2.get(1).equals(list.get(i).getEmail())) {
                 System.out.println("The list friend is :" + list.get(i).getUserFriends());
                 boolean bool = list.get(i).searchInFriendList((String) list2.get(2));
-                if (bool) {
+                boolean bool2 = list.get(i).searchInBlockList((String)list2.get(2));
+                if (bool && !bool2) {
                     System.out.println("This Friend is already exist");
                     ans = false;
 
@@ -566,7 +566,7 @@ public class Server {
                     for (int j = 0; j < list.size(); j++) {
                         if (list2.get(2).equals(list.get(j).getEmail())) {
                             list.get(i).addFriend(list.get(j));
-                            System.out.println("The userFriend is :" + list.get(j).getUserFriends());
+                         //   System.out.println("The userFriend is :" + list.get(j).getUserFriends());
                             System.out.println("The friend added");
                             ans = true;
                             break;

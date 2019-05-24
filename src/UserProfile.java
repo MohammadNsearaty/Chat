@@ -102,7 +102,7 @@ public class UserProfile implements Serializable {
     }
     public boolean blockUser(String name){
         boolean searchInBlockList = searchInBlockList(name);
-        if(!searchInBlockList)
+        if(searchInBlockList)
             return false;
         blockList.add(name);
         return true;}
