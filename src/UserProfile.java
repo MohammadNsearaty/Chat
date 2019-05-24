@@ -14,6 +14,44 @@ public class UserProfile implements Serializable {
     private String userId;
     private String story;
 
+    public ArrayList<String> getUserFriends() {
+        return userFriends;
+    }
+
+    public void setUserFriends(ArrayList<String> userFriends) {
+        this.userFriends = userFriends;
+    }
+
+    public ArrayList<String> getBlockList() {
+        return blockList;
+    }
+
+    public void setBlockList(ArrayList<String> blockList) {
+        this.blockList = blockList;
+    }
+
+    public ArrayList<Message> getCurrMessages() {
+        return currMessages;
+    }
+
+    public void setCurrMessages(ArrayList<Message> currMessages) {
+        this.currMessages = currMessages;
+    }
+
+    UserProfile()
+    {
+        userName ="";
+        password ="";
+        email = "";
+        birthDate = new Date();
+        userFriends = new ArrayList<>();
+        blockList = new ArrayList<>();
+        joinDate = new Date();
+        currMessages = new ArrayList<>();
+        story = "";
+    }
+
+
     public String getStory() {
         return story;
     }
@@ -44,26 +82,16 @@ public class UserProfile implements Serializable {
 
     public void setUserPassword(String password){ this.password = password; }
 
-    UserProfile()
-    {
-        userName ="";
-        password ="";
-        email = "";
-        birthDate = new Date();
-        userFriends = new ArrayList<>();
-        blockList = new ArrayList<>();
-        joinDate = new Date();
-        currMessages = new ArrayList<>();
-        story = "";
-    }
 
 
     public boolean addFriend(UserProfile friend){
-        boolean searchInFriendList = searchInFriendList(friend.getUserName());
-        if(!searchInFriendList)
-            return false;
-        userFriends.add(friend.getUserName());
-        return true;
+        boolean searchInFriendList = searchInFriendList(friend.getEmail());
+        if(searchInFriendList)
+            return true;
+        else {
+            userFriends.add(friend.getEmail());
+            return true;
+        }
     }
     public boolean deleteFriend(String friendName){
         boolean searchInFriendList = searchInFriendList(friendName);
@@ -85,10 +113,10 @@ public class UserProfile implements Serializable {
         blockList.remove(name);
         return true;
     }
-    public boolean searchInFriendList(String name){
+    public boolean searchInFriendList(String email){
         for(String str:userFriends)
         {
-            if(str.equals(name))
+            if(str.equals(email))
                 return true;
         }
         return false;
@@ -142,4 +170,6 @@ public class UserProfile implements Serializable {
     public void setJoinDate(Date joinDate) {
         this.joinDate = joinDate;
     }
+
+
 }
