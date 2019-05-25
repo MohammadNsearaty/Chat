@@ -3,6 +3,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 public class Server {
 
@@ -163,6 +164,7 @@ public class Server {
         arrayList.add(list.get(1));
         output.writeObject(arrayList);
         output.flush();
+
     }
 
     public void successfulRequestForFriendList(ArrayList<Object> lists) throws IOException {
@@ -618,7 +620,7 @@ public class Server {
 //>>>>>>> origin/master
         while (true) {
             try {
-                WaitForConnection();  //wait someone to connect with me
+                WaitForConnection(); //wait someone to connect with me
                 SetUpStream();// after one connect with me I Will setup my Stream InputStream and OutPutStream and setup connection
                 WhileChatting(); // the programme that will send and receive message
             } catch (EOFException eof) {
@@ -636,26 +638,10 @@ public class Server {
     //wait for connection then display connection information
     private void WaitForConnection() throws IOException {
         System.out.println("Waiting for someone to connect...");
-
         connection = server.accept(); // to accept any one want to chat with you
-
         System.out.println("connected");
-      /*  ///****
-        try {
-            ArrayList<Object> LogInfo;
-            input.readObject();
-            LogInfo = (ArrayList<Object>) input.readObject();
-            System.out.println(LogInfo);
-            UserProfile userProfile = serilaizeProfileObject(LogInfo);
-            logIn(userProfile);
 
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-       */ ///*****
     }
-
     //make the stream to send and receive the message
     private void SetUpStream() throws IOException {
 
@@ -664,7 +650,6 @@ public class Server {
         input = new ObjectInputStream(connection.getInputStream());
         output.writeObject(null);
         System.out.println("The Stream Is Ready");
-
 
     }
 
