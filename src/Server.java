@@ -16,6 +16,7 @@ public class Server {
 
     private Socket connection;
     boolean check = true;
+    private static Socket socket;
     private String emailsFileLocation = "h" + "angeFile";
     private String hangedMessagesFileLocation = "hangedMessages";
     private String groupsFileLocation = "groupsFile";
@@ -481,8 +482,8 @@ public class Server {
                         return bool;
                     }
                 }
-                System.out.println("The Block List of the User is :"+list.get(i).getBlockList());
-                System.out.println("The UserList Friend After Block is :"+list.get(i).getUserFriends());
+                System.out.println("The Block List of the User is :" + list.get(i).getBlockList());
+                System.out.println("The UserList Friend After Block is :" + list.get(i).getUserFriends());
             }
         }
         return bool;
@@ -557,7 +558,7 @@ public class Server {
             if (list2.get(1).equals(list.get(i).getEmail())) {
                 System.out.println("The list friend is :" + list.get(i).getUserFriends());
                 boolean bool = list.get(i).searchInFriendList((String) list2.get(2));
-                boolean bool2 = list.get(i).searchInBlockList((String)list2.get(2));
+                boolean bool2 = list.get(i).searchInBlockList((String) list2.get(2));
                 if (bool && !bool2) {
                     System.out.println("This Friend is already exist");
                     ans = false;
@@ -566,7 +567,7 @@ public class Server {
                     for (int j = 0; j < list.size(); j++) {
                         if (list2.get(2).equals(list.get(j).getEmail())) {
                             list.get(i).addFriend(list.get(j));
-                         //   System.out.println("The userFriend is :" + list.get(j).getUserFriends());
+                            //   System.out.println("The userFriend is :" + list.get(j).getUserFriends());
                             System.out.println("The friend added");
                             ans = true;
                             break;
@@ -726,7 +727,9 @@ public class Server {
         }
 
     }
+    /*
 
+     */
     //Update Chat Window
     private void ShowMessage(final String Text) {
     }
@@ -784,5 +787,32 @@ public class Server {
         }
     }
 
+    public void send(String message) {
+        try {
+
+            int port = 25000;
+            ServerSocket serverSocket = new ServerSocket(port);
+            System.out.println("server started and listening to the port 25000");
+
+            while (true) {
+                //read the message from the client
+                socket = serverSocket.accept();
+                InputStream is = socket.getInputStream();
+                InputStreamReader isr = new InputStreamReader(is);
+                BufferedReader br = new BufferedReader(isr);
+                while (true) {
+                    System.out.println(br.readLine());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                socket.close();
+            } catch (Exception e) {
+            }
+        }
+
+    }
 
 }
