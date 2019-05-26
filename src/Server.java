@@ -790,9 +790,9 @@ public class Server {
     public void send(String message) {
         try {
 
-            int port = 25000;
+            int port = 3000;
             ServerSocket serverSocket = new ServerSocket(port);
-            System.out.println("server started and listening to the port 25000");
+            System.out.println("server started to connect to the port 3000");
 
             while (true) {
                 //read the message from the client
