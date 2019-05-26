@@ -1,4 +1,7 @@
+import javafx.beans.binding.ObjectExpression;
+
 import java.io.*;
+import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -17,10 +20,11 @@ public class Server {
 
     private Socket connection;
     boolean check = true;
-    private static Socket socket;
     private String emailsFileLocation = "h" + "angeFile";
     private String hangedMessagesFileLocation = "hangedMessages";
     private String groupsFileLocation = "groupsFile";
+
+    public HashMap<String,HandleThread> onlineUsers = new HashMap<>();
 
     public Server() throws IOException, ClassNotFoundException {
         emailsFileLocation = "hangeFile";
@@ -156,14 +160,14 @@ public class Server {
         output.flush();
     }
 
-    public void successfulRequestForSignIn(ArrayList<Object> list) throws IOException {
+    public void successfulRequestForSignIn(ArrayList<Object> list,HandleThread thread) throws IOException {
         ArrayList<Object> arrayList = new ArrayList<>();
         arrayList.add(list.get(0));
         arrayList.add(true);
         arrayList.add("abc123");//Test Id
         arrayList.add(list.get(1));
-        output.writeObject(arrayList);
-        output.flush();
+        thread.getOutput().writeObject(arrayList);
+        thread.getOutput().flush();
 
     }
 
@@ -323,7 +327,9 @@ public class Server {
                     UserProfile userProfile = serilaizeSignInInfo(list2);
                     boolean bool = logIn(userProfile);
                     if (bool) {
-                        successfulRequestForSignIn(list2);
+                        successfulRequestForSignIn(list2,thread);
+                        thread.setEmail((String) list2.get(1));
+                     //   onlineUsers.put((String) list2.get(1),thread);
                     } else {
                         rejectRequest(list2);
                     }
@@ -484,8 +490,8 @@ public class Server {
                         return bool;
                     }
                 }
-                System.out.println("The Block List of the User is :" + list.get(i).getBlockList());
-                System.out.println("The UserList Friend After Block is :" + list.get(i).getUserFriends());
+                System.out.println("The Block List of the User is :"+list.get(i).getBlockList());
+                System.out.println("The UserList Friend After Block is :"+list.get(i).getUserFriends());
             }
         }
         return bool;
@@ -560,7 +566,7 @@ public class Server {
             if (list2.get(1).equals(list.get(i).getEmail())) {
                 System.out.println("The list friend is :" + list.get(i).getUserFriends());
                 boolean bool = list.get(i).searchInFriendList((String) list2.get(2));
-                boolean bool2 = list.get(i).searchInBlockList((String) list2.get(2));
+                boolean bool2 = list.get(i).searchInBlockList((String)list2.get(2));
                 if (bool && !bool2) {
                     System.out.println("This Friend is already exist");
                     ans = false;
@@ -569,7 +575,7 @@ public class Server {
                     for (int j = 0; j < list.size(); j++) {
                         if (list2.get(2).equals(list.get(j).getEmail())) {
                             list.get(i).addFriend(list.get(j));
-                            //   System.out.println("The userFriend is :" + list.get(j).getUserFriends());
+                         //   System.out.println("The userFriend is :" + list.get(j).getUserFriends());
                             System.out.println("The friend added");
                             ans = true;
                             break;
@@ -621,16 +627,14 @@ public class Server {
         while (true) {
             try {
                 WaitForConnection(); //wait someone to connect with me
-                SetUpStream();// after one connect with me I Will setup my Stream InputStream and OutPutStream and setup connection
-                WhileChatting(); // the programme that will send and receive message
+     //           SetUpStream();// after one connect with me I Will setup my Stream InputStream and OutPutStream and setup connection
+   //             WhileChatting(); // the programme that will send and receive message
             } catch (EOFException eof) {
                 eof.printStackTrace();
                 System.out.println("Stop:" + "\n" + "The Server End up the Connection...");
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            } finally {
+            }/*  finally {
                 CloseCrap();
-            }
+            }*/
 
         }
     }
@@ -639,7 +643,9 @@ public class Server {
     private void WaitForConnection() throws IOException {
         System.out.println("Waiting for someone to connect...");
         connection = server.accept(); // to accept any one want to chat with you
-        System.out.println("connected");
+        HandleThread thread = new HandleThread(connection);
+        onlineUsers.put(thread.getEmail(),thread);
+        System.out.println(onlineUsers);
 
     }
     //make the stream to send and receive the message
@@ -670,7 +676,7 @@ public class Server {
         System.out.println(recieveMessage);
         //if(recieveMessage!=)
         //{
-        handleRequest(recieveMessage);
+  //      handleRequest(recieveMessage);
         // }
 
         //} while (!message[0].equals("CLIENT - END")); // the while will excite until any one type END then the chat will stop here we deal with Just String
@@ -712,9 +718,7 @@ public class Server {
         }
 
     }
-    /*
 
-     */
     //Update Chat Window
     private void ShowMessage(final String Text) {
     }
@@ -775,6 +779,70 @@ public class Server {
         }
     }
 
+
+
+
+    public class HandleThread extends Thread {
+
+        private  String email = "";
+        private ObjectOutputStream output;
+        private ObjectInputStream input;
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public ObjectOutputStream getOutput() {
+            return output;
+        }
+
+        public void setOutput(ObjectOutputStream output) {
+            this.output = output;
+        }
+
+        public ObjectInputStream getInput() {
+            return input;
+        }
+
+        public void setInput(ObjectInputStream input) {
+            this.input = input;
+        }
+
+        HandleThread(Socket clientSocket)
+        {
+            try {
+                input = new ObjectInputStream(clientSocket.getInputStream());
+                output = new ObjectOutputStream (clientSocket.getOutputStream());
+                System.out.println(input.readObject());
+                ArrayList<Object> arrayList = (ArrayList<Object>) input.readObject();
+                handleRequest(arrayList,this);
+                start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            ArrayList<Object> arrayList = new ArrayList<>();
+
+            try{
+                while(true)
+                {
+                    arrayList = (ArrayList<Object>) input.readObject();
+                    handleRequest(arrayList,this);
+                }
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+            }
     public void send(String message) {
         try {
 
@@ -803,4 +871,6 @@ public class Server {
 
     }
 
+        }
+    }
 }
