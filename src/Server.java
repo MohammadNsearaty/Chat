@@ -153,6 +153,15 @@ public class Server {
         output.writeObject(arrayList);
         output.flush();
     }
+    public void successfulRequest(ArrayList<Object> list, ArrayList<Message> messages) throws IOException {  //HERE WE SEND THE DATA TO CLIENT
+        ArrayList<Object> arrayList = new ArrayList<>();
+        output = new ObjectOutputStream(connection.getOutputStream());
+        arrayList.add(list.get(0));
+        arrayList.add(true);
+        arrayList.add(messages);
+        output.writeObject(arrayList);
+        output.flush();
+    }
 
     public void successfulRequestForSignIn(ArrayList<Object> lists) throws IOException {
         ArrayList<Object> arrayList = new ArrayList<>();
@@ -228,10 +237,10 @@ public class Server {
         messagelist = messages;
     }
 
-    public Message freeMessage(String messageId) {
+    public Message freeMessage(int messageId) {
 
         for (Message message : messagelist) {
-            if (message.getMessageID().equals(messageId)) {
+            if (message.getMessageID()==(messageId)) {
                 messagelist.remove(message);
                 return message;
             }
@@ -285,11 +294,16 @@ public class Server {
 
     public Message serilaizemessageObject(ArrayList<Object> arrayList) {
         Message message = new Message();
+        UserProfile userProfile = new UserProfile();
 
         message.setType((messageType) arrayList.get(1));
-        message.setMessageID("25");
 
-
+        message.generateID();
+        message.setSenderID(userProfile.getEmail());
+        message.setRecieverID((String) arrayList.get(2));
+        message.setObject(arrayList.get(3)); // data?
+        message.setRecieved(false);
+        message.setSendDate(new Date());
         return message;
     }
 
@@ -444,7 +458,13 @@ public class Server {
 
                 break;
             }
-
+            case 12: //SEND_MESSAGE
+            {
+                Message message = serilaizemessageObject(list2);
+                hangMessage((message));
+                successfulRequest(list2);
+                break;
+            }
             // case 20
 
            /* case 9: //DELETE_GROUP
@@ -781,7 +801,7 @@ public class Server {
     }
 
     //Send Message to client
-    public void SendMessage(String message) {
+  /*  public void SendMessage(String message) {
         try {
             //   System.out.println("SendMessage() was called");
             System.out.println("Server - " + message);
@@ -794,7 +814,7 @@ public class Server {
 
         }
 
-    }
+    }*/
 
     //Update Chat Window
     private void ShowMessage(final String Text) {
@@ -852,6 +872,57 @@ public class Server {
             e.printStackTrace();
         }
     }
+/*public void send(String message) {
+        try {
+
+            int port = 3000;
+            ServerSocket serverSocket = new ServerSocket(port);
+            System.out.println("server started to connect to the port 3000");
+
+            while (true) {
+                //read the message from the client
+                socket = serverSocket.accept();
+                InputStream is = socket.getInputStream();
+                InputStreamReader isr = new InputStreamReader(is);
+                BufferedReader br = new BufferedReader(isr);
+                String number = br.readLine();
+                System.out.println("Message received from client is "+number);
+
+                String returnMessage;
+                 try
+                {
+                    int numberInIntFormat = Integer.parseInt(number);
+                    int returnValue = numberInIntFormat*2;
+                    returnMessage = String.valueOf(returnValue) + "\n";
+                }
+                catch(NumberFormatException e)
+                {
+                    //Input was not a number. Sending proper message back to client.
+                    returnMessage = "Please send a proper number\n";
+                }
+                //Sending the response back to the client.
+                OutputStream os = socket.getOutputStream();
+                OutputStreamWriter osw = new OutputStreamWriter(os);
+                BufferedWriter bw = new BufferedWriter(osw);
+                bw.write(returnMessage);
+                System.out.println("Message sent to the client is "+returnMessage);
+                bw.flush();
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            try
+            {
+                socket.close();
+            }
+            catch(Exception e){}
+        }
+    }
+}*/
 
 
 }
