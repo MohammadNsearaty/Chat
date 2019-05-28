@@ -157,23 +157,24 @@ public class Server {
         output.flush();
     }
 
-    public void successfulRequestForSignIn(ArrayList<Object> list,HandleThread thread) throws IOException {
-        ArrayList<Object> arrayList = new ArrayList<>();
-        arrayList.add(lists.get(0));
-        arrayList.add(true);
-        arrayList.add("abc123");//Test Id
-        arrayList.add(list.get(1));
-        thread.getOutput().writeObject(arrayList);
-        thread.getOutput().flush();
+    public void successfulRequestForSignIn(ArrayList<Object> newList,HandleThread thread) throws IOException {
 
-        arrayList.add(lists.get(1));
+        ArrayList<Object> sendList = new ArrayList<>();
+
+        sendList.add(1);
+        sendList.add(true);
+        sendList.add(newList.get(1));
+        sendList.add(newList.get(2));
         for(int i =0 ; i<list.size();i++){
-            if(list.get(i).getEmail().equals(lists.get(1))){
-                arrayList.add(list.get(i).getName());
+            if(list.get(i).getEmail().equals(newList.get(1))){
+                sendList.add(list.get(i).getName());
+                sendList.add(list.get(i).getUserFriends());
+                sendList.add(list.get(i).getBlockList());
             }
         }
-        output.writeObject(arrayList);
-        output.flush();
+        thread.getOutput().writeObject(sendList);
+        thread.getOutput().flush();
+
     }
 
     public void successfulRequestForFriendList(ArrayList<Object> lists) throws IOException {
@@ -314,7 +315,7 @@ public class Server {
         return null;
     }
 
-    public void handleRequest(ArrayList<Object> list2) throws IOException {
+    public void handleRequest(ArrayList<Object> list2, HandleThread thread) throws IOException {
         int type = (int) list2.get(0);
         switch (type) {
             case 0://Add user
@@ -329,13 +330,13 @@ public class Server {
             case 1://sign in
             {
                 try {
-                    System.out.println("abababa");
+                 //   System.out.println("abababa");
                     UserProfile userProfile = serilaizeSignInInfo(list2);
                     boolean bool = logIn(userProfile);
                     if (bool) {
-                        successfulRequestForSignIn(list2,thread);
+                        successfulRequestForSignIn(list2, thread);
                         thread.setEmail((String) list2.get(1));
-                     //   onlineUsers.put((String) list2.get(1),thread);
+                        //   onlineUsers.put((String) list2.get(1),thread);
                     } else {
                         rejectRequest(list2);
                     }
@@ -636,7 +637,6 @@ public class Server {
                 boolean bool = list.get(i).searchInFriendList((String) list2.get(2));
                 boolean bool2 = list.get(i).searchInBlockList((String) list2.get(2));
                 System.out.println("The User Block List :"+list.get(i).getBlockList());
-                boolean bool2 = list.get(i).searchInBlockList((String)list2.get(2));
                 if (bool && !bool2) {
                     System.out.println("This Friend is already exist");
                     ans = false;
@@ -910,38 +910,9 @@ public class Server {
                     arrayList = (ArrayList<Object>) input.readObject();
                     handleRequest(arrayList,this);
                 }
-            }catch(Exception e)
-            {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-    public void send(String message) {
-        try {
-
-            int port = 3000;
-            ServerSocket serverSocket = new ServerSocket(port);
-            System.out.println("server started to connect to the port 3000");
-
-            while (true) {
-                //read the message from the client
-                socket = serverSocket.accept();
-                InputStream is = socket.getInputStream();
-                InputStreamReader isr = new InputStreamReader(is);
-                BufferedReader br = new BufferedReader(isr);
-                while (true) {
-                    System.out.println(br.readLine());
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                socket.close();
-            } catch (Exception e) {
-            }
-        }
-
-    }
-
         }
     }
 }
