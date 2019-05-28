@@ -20,7 +20,7 @@ public class main extends Application implements EventHandler {
     TextField textField = new TextField();
 
 
-   static Server server;
+    static Server server;
 
     static {
         try {
@@ -84,8 +84,8 @@ public class main extends Application implements EventHandler {
         HBox layout = new HBox();
 
         VBox vBox = new VBox();
-       // vBox.getChildren().add(imageView);
-       // listView.getItems().addAll(server.getList());
+        // vBox.getChildren().add(imageView);
+        // listView.getItems().addAll(server.getList());
 
 
 
@@ -102,6 +102,5 @@ public class main extends Application implements EventHandler {
     public void handle(Event event) {
         String message = textField.getText();
         server.SendMessage(message);
-        server.send(message);
     }
 }

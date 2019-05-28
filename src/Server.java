@@ -1,7 +1,4 @@
-import javafx.beans.binding.ObjectExpression;
-
 import java.io.*;
-import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -162,13 +159,21 @@ public class Server {
 
     public void successfulRequestForSignIn(ArrayList<Object> list,HandleThread thread) throws IOException {
         ArrayList<Object> arrayList = new ArrayList<>();
-        arrayList.add(list.get(0));
+        arrayList.add(lists.get(0));
         arrayList.add(true);
         arrayList.add("abc123");//Test Id
         arrayList.add(list.get(1));
         thread.getOutput().writeObject(arrayList);
         thread.getOutput().flush();
 
+        arrayList.add(lists.get(1));
+        for(int i =0 ; i<list.size();i++){
+            if(list.get(i).getEmail().equals(lists.get(1))){
+                arrayList.add(list.get(i).getName());
+            }
+        }
+        output.writeObject(arrayList);
+        output.flush();
     }
 
     public void successfulRequestForFriendList(ArrayList<Object> lists) throws IOException {
@@ -260,6 +265,7 @@ public class Server {
         userProfile.setBirthDate((Date) arrayList.get(4));
         userProfile.setJoinDate((Date) arrayList.get(5));
         userProfile.setUserId("abc123");
+
 
         return userProfile;
     }
@@ -418,8 +424,40 @@ public class Server {
 
                 break;
             }
+            case 9: //To Send Story Of ListFriend
+            {
+                break;
+            }
 
-            case 9: //DELETE_GROUP
+            case 10: //To UnBlock The User
+            {
+                if (list != null) {
+                    boolean bool = CheckUserListFriendOfUserToRemoveBlock(list2);
+
+                    if (bool) {
+                        successfulRequestForBlockFriend(list2);
+                    } else {
+                        rejectRequest(list2);
+                    }
+                }
+
+                break;
+            }
+            case 11: //To Send The Specific List Friend To user :)
+            {
+                if (list != null) {
+                    SuccessfulUserListFriendSpecific(list2);
+                } else {
+                    rejectRequest(list2);
+                }
+
+
+                break;
+            }
+
+            // case 20
+
+           /* case 9: //DELETE_GROUP
             {
                 Group group = serilaizegroupObject(list2);
                 if (!deleteGroup(group))
@@ -465,8 +503,38 @@ public class Server {
                 else
                     successfulRequest(list2);
                 break;
+            }*/
+        }
+    }
+
+    private void SuccessfulUserListFriendSpecific(ArrayList<Object> list2) throws IOException {
+
+        ArrayList<Object> arrayList = new ArrayList<>();
+        arrayList.add(list2.get(0));
+        arrayList.add(true);
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getEmail().equals(list2.get(1)) && list.get(i).getUserFriends() != null) {
+                for (int j = 0; j < list.get(i).getUserFriends().size(); j++) {
+                    for (int k = 0; k < list.size(); k++) {
+                        if (list.get(i).getUserFriends().get(j).equals(list.get(k).getEmail())) {
+                            arrayList.add(list.get(k).getName());
+                            arrayList.add(list.get(k).getStory());
+                        }
+                    }
+
+                }
             }
         }
+        System.out.println("The User List Specific is :" + arrayList);
+        output.writeObject(arrayList);
+        output.flush();
+
+
+    }
+
+
+    private boolean CheckUserListFriendOfUserToRemoveBlock(ArrayList<Object> list2) {
+        return true;
     }
 
     private void successfulRequestForBlockFriend(ArrayList<Object> list2) throws IOException {
@@ -566,12 +634,15 @@ public class Server {
             if (list2.get(1).equals(list.get(i).getEmail())) {
                 System.out.println("The list friend is :" + list.get(i).getUserFriends());
                 boolean bool = list.get(i).searchInFriendList((String) list2.get(2));
+                boolean bool2 = list.get(i).searchInBlockList((String) list2.get(2));
+                System.out.println("The User Block List :"+list.get(i).getBlockList());
                 boolean bool2 = list.get(i).searchInBlockList((String)list2.get(2));
                 if (bool && !bool2) {
                     System.out.println("This Friend is already exist");
                     ans = false;
 
-                } else {
+
+                } else if(!bool){
                     for (int j = 0; j < list.size(); j++) {
                         if (list2.get(2).equals(list.get(j).getEmail())) {
                             list.get(i).addFriend(list.get(j));
