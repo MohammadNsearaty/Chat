@@ -103,6 +103,6 @@ public class main extends Application implements EventHandler {
 
 
         String message = textField.getText();
-        server.SendMessage(message);
+      //  server.SendMessage(message);
     }
 }

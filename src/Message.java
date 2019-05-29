@@ -1,14 +1,18 @@
 import java.util.Date;
 
 public class Message {
-    private String messageID;
+    private int messageID;
+    private static int IDs = 0;
 
-    public String getMessageID() {
+    public int getMessageID() {
         return messageID;
     }
 
-    public void setMessageID(String messageID) {
+    public void setMessageID(int messageID) {
         this.messageID = messageID;
+    }
+    public void generateID(){
+        messageID = IDs++;
     }
 
     private String senderID;
