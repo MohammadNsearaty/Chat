@@ -1,3 +1,5 @@
+import javafx.collections.ObservableList;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -229,9 +231,6 @@ public class Server {
         return true;
     }
 
-    public void hangMessage(Message message) {
-        messagelist.add(message);
-    }
 
     public void hangUserMessages(ArrayList<Message> messages) {
         messagelist = messages;
@@ -249,10 +248,10 @@ public class Server {
     }
 
 
-    public ArrayList<Message> searchInHangedMessages(String userId) {
+    public ArrayList<Message> searchInHangedMessages(String userEmail) {
         ArrayList<Message> userMessages = new ArrayList<>();
         for (Message message : messagelist)
-            if (message.getRecieverID().equals(userId))
+            if (message.getRecieverEmail().equals(userEmail))
                 userMessages.add(freeMessage(message.getMessageID()));
         return userMessages;
     }
@@ -455,6 +454,27 @@ public class Server {
 
                 break;
             }
+            case 13:
+            {
+                String recieverEmail = (String) list2.get(2);
+                boolean res = false;
+                for(String email:onlineUsers.keySet())
+                    if(email.equals(recieverEmail))
+                    {
+                        res = true;
+                        break;
+                    }
+                if(res)
+                {
+                    sendMessage2OnlineUser(list2);
+                }
+                else
+                {
+                    hangeMessage(list2);
+                }
+                break;
+
+            }
 
             // case 20
 
@@ -508,6 +528,23 @@ public class Server {
         }
     }
 
+    public void sendMessage2OnlineUser(ArrayList<Object> sendList)
+    {
+        String recieverEmail = (String) sendList.get(2);
+        HandleThread thread = onlineUsers.get(recieverEmail);
+
+        try {
+            thread.output.writeObject(sendList);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void hangeMessage(ArrayList<Object> hangList)
+    {
+        Message message = new Message(hangList);
+        messagelist.add(message);
+    }
     private void SuccessfulUserListFriendSpecific(ArrayList<Object> list2) throws IOException {
 
         ArrayList<Object> arrayList = new ArrayList<>();
@@ -716,7 +753,6 @@ public class Server {
         connection = server.accept(); // to accept any one want to chat with you
         HandleThread thread = new HandleThread(connection);
         onlineUsers.put(thread.getEmail(),thread);
-        System.out.println(onlineUsers);
 
     }
     //make the stream to send and receive the message
@@ -910,7 +946,13 @@ public class Server {
                     arrayList = (ArrayList<Object>) input.readObject();
                     handleRequest(arrayList,this);
                 }
-            } catch (Exception e) {
+            }
+            catch (EOFException e)
+            {
+                onlineUsers.remove(email);
+                System.out.println(email + " Is Offline");
+            }
+            catch (Exception e) {
                 e.printStackTrace();
             }
         }
