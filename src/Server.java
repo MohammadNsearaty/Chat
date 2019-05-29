@@ -1,3 +1,5 @@
+import javafx.collections.ObservableList;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -200,6 +202,7 @@ public class Server {
                 arrayList.add(tempFriendList);
             }
         }
+
         output.writeObject(arrayList);
         output.flush();
     }
@@ -238,9 +241,6 @@ public class Server {
         return true;
     }
 
-    public void hangMessage(Message message) {
-        messagelist.add(message);
-    }
 
     public void hangUserMessages(ArrayList<Message> messages) {
         messagelist = messages;
@@ -258,10 +258,10 @@ public class Server {
     }
 
 
-    public ArrayList<Message> searchInHangedMessages(String userId) {
+    public ArrayList<Message> searchInHangedMessages(String userEmail) {
         ArrayList<Message> userMessages = new ArrayList<>();
         for (Message message : messagelist)
-            if (message.getRecieverID().equals(userId))
+            if (message.getRecieverEmail().equals(userEmail))
                 userMessages.add(freeMessage(message.getMessageID()));
         return userMessages;
     }
@@ -340,6 +340,7 @@ public class Server {
             {
                 try {
                     //   System.out.println("abababa");
+                 //   System.out.println("abababa");
                     UserProfile userProfile = serilaizeSignInInfo(list2);
                     boolean bool = logIn(userProfile);
                     if (bool) {
@@ -471,6 +472,27 @@ public class Server {
                     if(email.equals(recieverEmail))
                 }
             }
+            case 13:
+            {
+                String recieverEmail = (String) list2.get(2);
+                boolean res = false;
+                for(String email:onlineUsers.keySet())
+                    if(email.equals(recieverEmail))
+                    {
+                        res = true;
+                        break;
+                    }
+                if(res)
+                {
+                    sendMessage2OnlineUser(list2);
+                }
+                else
+                {
+                    hangeMessage(list2);
+                }
+                break;
+
+            }
 
 
 
@@ -524,6 +546,23 @@ public class Server {
         }
     }
 
+    public void sendMessage2OnlineUser(ArrayList<Object> sendList)
+    {
+        String recieverEmail = (String) sendList.get(2);
+        HandleThread thread = onlineUsers.get(recieverEmail);
+
+        try {
+            thread.output.writeObject(sendList);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void hangeMessage(ArrayList<Object> hangList)
+    {
+        Message message = new Message(hangList);
+        messagelist.add(message);
+    }
     private void SuccessfulUserListFriendSpecific(ArrayList<Object> list2) throws IOException {
 
         ArrayList<Object> arrayList = new ArrayList<>();
@@ -623,6 +662,7 @@ public class Server {
     }
 
     public boolean CheckTheUserList(ArrayList<Object> list2) {
+        boolean bool = false;
         for (int i = 0; i < list.size(); i++) {
             if (list.get(i).getEmail().equals(list2.get(1))) {
                 list.get(i).setStory((String) list2.get(3));
@@ -750,7 +790,7 @@ public class Server {
         System.out.println(recieveMessage);
         //if(recieveMessage!=)
         //{
-        //      handleRequest(recieveMessage);
+  //      handleRequest(recieveMessage);
         // }
 
         //} while (!message[0].equals("CLIENT - END")); // the while will excite until any one type END then the chat will stop here we deal with Just String

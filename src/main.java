@@ -100,8 +100,6 @@ public class main extends Application implements EventHandler {
 
     @Override
     public void handle(Event event) {
-
-
         String message = textField.getText();
       //  server.SendMessage(message);
     }

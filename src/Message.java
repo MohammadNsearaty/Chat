@@ -1,24 +1,33 @@
+import java.awt.*;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class Message {
-    private int messageID;
-    private static int IDs = 0;
 
-    public int getMessageID() {
+    public Message()
+    {
+
+    }
+    public Message(ArrayList<Object> list)
+    {
+        setSenderEmail((String) list.get(1));
+        setRecieverEmail((String) list.get(2));
+        setObject(list.get(3));
+        setSendDate((Date) list.get(4));
+    }
+    private String messageID;
+
+    public String getMessageID() {
         return messageID;
     }
 
-    public void setMessageID(int messageID) {
+    public void setMessageID(String messageID) {
         this.messageID = messageID;
     }
-    public void generateID(){
-        messageID = IDs++;
-    }
 
-    private String senderID;
-    private String recieverID;
+    private String senderEmail;
+    private String recieverEmail;
     private boolean groupMessage;
-    private boolean recieved;
     private Object object;
     private messageType type;
     private Date sendDate;
@@ -26,36 +35,30 @@ public class Message {
 
 
     //The Setters And The Getters
-        public String getSenderID () {
-        return senderID;
+
+
+    public String getSenderEmail() {
+        return senderEmail;
     }
 
-        public void setSenderID (String senderID){
-        this.senderID = senderID;
+    public void setSenderEmail(String senderEmail) {
+        this.senderEmail = senderEmail;
     }
 
-        public String getRecieverID () {
-        return recieverID;
+    public String getRecieverEmail() {
+        return recieverEmail;
     }
 
-        public void setRecieverID (String recieverID){
-        this.recieverID = recieverID;
+    public void setRecieverEmail(String recieverEmail) {
+        this.recieverEmail = recieverEmail;
     }
 
-        public boolean isGroupMessage () {
+    public boolean isGroupMessage () {
         return groupMessage;
     }
 
         public void setGroupMessage ( boolean groupMessage){
         this.groupMessage = groupMessage;
-    }
-
-        public boolean isRecieved () {
-        return recieved;
-    }
-
-        public void setRecieved ( boolean recieved){
-        this.recieved = recieved;
     }
 
         public Object getObject () {
