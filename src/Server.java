@@ -246,10 +246,10 @@ public class Server {
         messagelist = messages;
     }
 
-    public Message freeMessage(String messageId) {
+    public Message freeMessage(int  messageId) {
 
         for (Message message : messagelist) {
-            if (message.getMessageID().equals(messageId)) {
+            if (message.getMessageID()==(messageId)) {
                 messagelist.remove(message);
                 return message;
             }
@@ -305,7 +305,7 @@ public class Server {
         Message message = new Message();
 
         message.setType((messageType) arrayList.get(1));
-        message.setMessageID("25");
+        message.setMessageID(25);
 
 
         return message;
