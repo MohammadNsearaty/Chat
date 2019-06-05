@@ -12,8 +12,6 @@ public class Server {
     private ObjectOutputStream output;
     private ObjectInputStream input;
     private ServerSocket server;
-   UserProfile userProfile;
-
 
     private ArrayList<UserProfile> list = new ArrayList<>();
     private ArrayList<Message> messagelist;
@@ -25,7 +23,7 @@ public class Server {
     private String hangedMessagesFileLocation = "hangedMessages";
     private String groupsFileLocation = "groupsFile";
 
-    public HashMap<String,HandleThread> onlineUsers = new HashMap<>();
+    public HashMap<String, HandleThread> onlineUsers = new HashMap<>();
 
     public Server() throws IOException, ClassNotFoundException {
         emailsFileLocation = "hangeFile";
@@ -122,23 +120,19 @@ public class Server {
 
     public boolean deleteUser(UserProfile user) {
         if (checkIfUserNameAvailable(user.getName()))
-        { return false;}
+            return false;
         list.remove(user);
-        userProfile = null;
         return true;
 
     }
 
     public boolean updateUser(UserProfile user) {
-
-                if (checkIfUserNameAvailable(user.getName())) {//h
+        if (checkIfUserNameAvailable(user.getName()))
             return false;
-        }
-            for (UserProfile er : list) {
-            if (er.getEmail() == user.getEmail()) {
+        for (UserProfile er : list) {
+            if (er.getUserId() == user.getUserId()) {
                 list.remove(er);
-               list.add(user);
-                userProfile = user;
+                list.add(user);
             }
         }
         return false;
@@ -146,26 +140,26 @@ public class Server {
 
     }
 
-    public void rejectRequest(ArrayList<Object> list) throws IOException {
+    public void rejectRequest(ArrayList<Object> list, HandleThread thread) throws IOException {
         ArrayList<Object> arrayList = new ArrayList<>();
         arrayList.add(list.get(0));
         arrayList.add(false);
-        output.writeObject(arrayList);
-        output.flush();
+        thread.getOutput().writeObject(arrayList);
+        thread.getOutput().flush();
     }
 
-    public void successfulRequest(ArrayList<Object> list) throws IOException {  //HERE WE SEND THE DATA TO CLIENT
+    public void successfulRequest(ArrayList<Object> list, HandleThread thread) throws IOException {  //HERE WE SEND THE DATA TO CLIENT
         ArrayList<Object> arrayList = new ArrayList<>();
         UserProfile profile = serilaizeProfileObject(list);
-        addUser(profile);//مالا طعمة
+        addUser(profile);
         arrayList.add(list.get(0));
         arrayList.add(true);
-        arrayList.add("abc123");//Test Id
-        output.writeObject(arrayList);
-        output.flush();
+        // arrayList.add("abc123");//Test Id
+        thread.getOutput().writeObject(arrayList);
+        thread.getOutput().flush();
     }
 
-    public void successfulRequestForSignIn(ArrayList<Object> newList,HandleThread thread) throws IOException {
+    public void successfulRequestForSignIn(ArrayList<Object> newList, HandleThread thread) throws IOException {
 
         ArrayList<Object> sendList = new ArrayList<>();
 
@@ -173,11 +167,31 @@ public class Server {
         sendList.add(true);
         sendList.add(newList.get(1));
         sendList.add(newList.get(2));
-        for(int i =0 ; i<list.size();i++){
-            if(list.get(i).getEmail().equals(newList.get(1))){
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getEmail().equals(newList.get(1))) {
                 sendList.add(list.get(i).getName());
                 sendList.add(list.get(i).getUserFriends());
+               // sendList.add(list.get(i).getName());
                 sendList.add(list.get(i).getBlockList());
+                for (int j = 0; j < list.get(i).getUserFriends().size(); j++) {
+                    for (int k = 0; k < list.size(); k++) {
+                        if (list.get(i).getUserFriends().get(j).equals(list.get(k).getEmail())) {
+                            //sendList.add(list.get(k).getEmail());
+                            sendList.add(list.get(k).getName());
+                            sendList.add(list.get(k).getStory());
+                        }
+                    }
+                }
+                sendList.add("0");
+
+                //   sendList.add(list.get(i).getUserFriends());
+            }
+
+        }
+        for (int i = 0; i < list.size(); i++) {
+            if (list!=null &&!list.get(i).getEmail().equals(newList.get(1))) {
+                sendList.add(list.get(i).getName());
+                sendList.add(list.get(i).getEmail());
             }
         }
         thread.getOutput().writeObject(sendList);
@@ -185,26 +199,23 @@ public class Server {
 
     }
 
-    public void successfulRequestForFriendList(ArrayList<Object> lists) throws IOException {
+    public void successfulRequestForFriendList(ArrayList<Object> lists, HandleThread thread) throws IOException {
 
-           ///h
-        ArrayList<Object> arrayList = new ArrayList<>(), tempFriendList = new ArrayList<>();
+
+        ArrayList<Object> arrayList = new ArrayList<>();
         arrayList.add(lists.get(0));
+        arrayList.add(true);
+        arrayList.add((int) list.size());
         for (int i = 0; i < list.size(); i++) {
-            for(int j=0; j<userProfile.getUserFriends().size(); j++){
-                tempFriendList.add(list.get(i).getName());
-                tempFriendList.add(list.get(i).getEmail());
-            }
-            if(tempFriendList.size()==0)
-            {arrayList.add(true);
-            }else{
-                arrayList.add(true);
-                arrayList.add(tempFriendList);
+            if (!lists.get(1).equals(list.get(i).getEmail())) {
+                arrayList.add(list.get(i).getName());
+                arrayList.add(list.get(i).getEmail());
+
             }
         }
-
-        output.writeObject(arrayList);
-        output.flush();
+        System.out.println("The User UnFriend List is" + arrayList);
+        thread.getOutput().writeObject(arrayList);
+        thread.getOutput().flush();
     }
 
     public boolean createGroup(Group group) {
@@ -327,20 +338,19 @@ public class Server {
     public void handleRequest(ArrayList<Object> list2, HandleThread thread) throws IOException {
         int type = (int) list2.get(0);
         switch (type) {
-            case 0://Add user
+            case 0://Add New user
             {
                 UserProfile userProfile = serilaizeProfileObject(list2);
                 if (!addUser(userProfile)) {
-                    rejectRequest(list2);
+                    rejectRequest(list2, thread);
                 } else
-                    successfulRequest(list2);
+                    successfulRequest(list2, thread);
                 break;
             }
             case 1://sign in
             {
                 try {
                     //   System.out.println("abababa");
-                 //   System.out.println("abababa");
                     UserProfile userProfile = serilaizeSignInInfo(list2);
                     boolean bool = logIn(userProfile);
                     if (bool) {
@@ -348,7 +358,7 @@ public class Server {
                         thread.setEmail((String) list2.get(1));
                         //   onlineUsers.put((String) list2.get(1),thread);
                     } else {
-                        rejectRequest(list2);
+                        rejectRequest(list2, thread);
                     }
 
                 } catch (Exception e) {
@@ -361,23 +371,27 @@ public class Server {
             }
             case 2: //DELETE_USER
             {
-                        deleteUser(userProfile);
-                        successfulRequest(list2);
-                        break;
+                UserProfile userProfile = serilaizeProfileObject(list2);
+                if (!deleteUser(userProfile)) {
+                    rejectRequest(list2, thread);
+                } else
+                    successfulRequest(list2, thread);
+                break;
             }
             case 3: //UPDATE_USER
             {
                 UserProfile userProfile = serilaizeProfileObject(list2);
                 updateUser(userProfile);
-                successfulRequest(list2);
+                successfulRequest(list2, thread);
                 break;
-
             }
             case 4: //Send The list user
             {
-
-                    successfulRequestForFriendList(list2);
-
+                if (list != null) {
+                    successfulRequestForFriendList(list2, thread);
+                } else {
+                    rejectRequest(list2, thread);
+                }
 
                 break;
             }
@@ -386,9 +400,9 @@ public class Server {
                 if (list != null) {
                     boolean bool = CheckTheUserList(list2);
                     if (bool) {
-                        successfulRequestForEditInfo(list2);
+                        successfulRequestForEditInfo(list2, thread);
                     } else {
-                        rejectRequest(list2);
+                        rejectRequest(list2, thread);
                     }
                 }
                 break;
@@ -397,9 +411,9 @@ public class Server {
                 if (list != null) {
                     boolean bool = CheckUserListFriend(list2);
                     if (bool) {
-                        successfulRequestForAddFriend(list2);
+                        successfulRequestForAddFriend(list2, thread);
                     } else {
-                        rejectRequest(list2);
+                        rejectRequest(list2, thread);
                     }
                 }
                 break;
@@ -410,9 +424,9 @@ public class Server {
                     boolean bool = CheckUserListFriendOfUser(list2);
 
                     if (bool) {
-                        successfulRequestForRemoveFriend(list2);
+                        successfulRequestForRemoveFriend(list2, thread);
                     } else {
-                        rejectRequest(list2);
+                        rejectRequest(list2, thread);
                     }
                 }
                 break;
@@ -423,9 +437,9 @@ public class Server {
                     boolean bool = CheckUserListFriendOfUserToBlock(list2);
 
                     if (bool) {
-                        successfulRequestForBlockFriend(list2);
+                        successfulRequestForBlockFriend(list2, thread);
                     } else {
-                        rejectRequest(list2);
+                        rejectRequest(list2, thread);
                     }
                 }
 
@@ -442,9 +456,9 @@ public class Server {
                     boolean bool = CheckUserListFriendOfUserToRemoveBlock(list2);
 
                     if (bool) {
-                        successfulRequestForBlockFriend(list2);
+                        successfulRequestForBlockFriend(list2, thread);
                     } else {
-                        rejectRequest(list2);
+                        rejectRequest(list2, thread);
                     }
                 }
 
@@ -453,48 +467,33 @@ public class Server {
             case 11: //To Send The Specific List Friend To user :)
             {
                 if (list != null) {
-                    SuccessfulUserListFriendSpecific(list2);
+                    SuccessfulUserListFriendSpecific(list2, thread);
                 } else {
-                    rejectRequest(list2);
+                    rejectRequest(list2, thread);
                 }
 
 
                 break;
-            }/*
-            case 12:
-            {
-                String senderEmail;
-                String recieverEmail;
-                Object messageContent;
-
-                for(String email:onlineUsers.keySet())
-                {
-                    if(email.equals(recieverEmail))
-                }
             }
-            case 13:
-            {
+            case 13: {
                 String recieverEmail = (String) list2.get(2);
                 boolean res = false;
-                for(String email:onlineUsers.keySet())
-                    if(email.equals(recieverEmail))
-                    {
+                System.out.println(list2);
+                for (String email : onlineUsers.keySet())
+                    if (email.equals(recieverEmail)) {
                         res = true;
                         break;
                     }
-                if(res)
-                {
+                if (res) {
                     sendMessage2OnlineUser(list2);
-                }
-                else
-                {
+                } else {
                     hangeMessage(list2);
                 }
                 break;
 
             }
 
-
+            // case 20
 
            /* case 9: //DELETE_GROUP
             {
@@ -546,8 +545,7 @@ public class Server {
         }
     }
 
-    public void sendMessage2OnlineUser(ArrayList<Object> sendList)
-    {
+    public void sendMessage2OnlineUser(ArrayList<Object> sendList) {
         String recieverEmail = (String) sendList.get(2);
         HandleThread thread = onlineUsers.get(recieverEmail);
 
@@ -558,12 +556,12 @@ public class Server {
         }
     }
 
-    public void hangeMessage(ArrayList<Object> hangList)
-    {
+    public void hangeMessage(ArrayList<Object> hangList) {
         Message message = new Message(hangList);
         messagelist.add(message);
     }
-    private void SuccessfulUserListFriendSpecific(ArrayList<Object> list2) throws IOException {
+
+    private void SuccessfulUserListFriendSpecific(ArrayList<Object> list2, HandleThread thread) throws IOException {
 
         ArrayList<Object> arrayList = new ArrayList<>();
         arrayList.add(list2.get(0));
@@ -582,82 +580,102 @@ public class Server {
             }
         }
         System.out.println("The User List Specific is :" + arrayList);
-        output.writeObject(arrayList);
-        output.flush();
+        thread.getOutput().writeObject(arrayList);
+        thread.getOutput().flush();
 
 
     }
 
 
     private boolean CheckUserListFriendOfUserToRemoveBlock(ArrayList<Object> list2) {
-        return true;
+        boolean bool = false;
+
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getEmail().equals(list2.get(1))) {
+                System.out.println("The Block List is" + list.get(i).getBlockList());
+                for (int j = 0; j < list.get(i).getBlockList().size(); j++) {
+                    if (list.get(i).getBlockList().get(j).equals(list2.get(2))) {
+                        list.get(i).getBlockList().remove(j);
+                        bool = true;
+                        System.out.println("The Block List is" + list.get(i).getBlockList());
+                    } else {
+                        System.out.println("The user is UnBlock already");
+                    }
+
+                }
+            }
+
+        }
+        return bool;
     }
 
-    private void successfulRequestForBlockFriend(ArrayList<Object> list2) throws IOException {
+    private void successfulRequestForBlockFriend(ArrayList<Object> list2, HandleThread thread) throws IOException {
 
         ArrayList<Object> arrayList = new ArrayList<>();
         arrayList.add(list2.get(0));
         arrayList.add(true);
-        output.writeObject(arrayList);
-        output.flush();
+        thread.getOutput().writeObject(arrayList);
+        thread.getOutput().flush();
     }
 
-    private boolean CheckUserListFriendOfUserToBlock(ArrayList<Object> list2) {
+    private boolean CheckUserListFriendOfUserToBlock(ArrayList<Object> list2) throws IOException {
         boolean bool = false;
         for (int i = 0; i < list.size(); i++) {
-            if (list2.get(1).equals(list.get(i).getEmail())) {
+            if (list.get(i).getEmail().equals(list2.get(1))) {
+                System.out.println("The Block List of the User is :" + list.get(i).getBlockList());
                 for (int j = 0; j < list.get(i).getUserFriends().size(); j++) {
                     if (list.get(i).getUserFriends().get(j).equals(list2.get(2)) && !list.get(i).searchInBlockList((String) list2.get(2))) {
                         list.get(i).blockUser((String) list2.get(2));
-                        list.get(i).getUserFriends().remove(j);
+                        list.get(i).deleteFriend((String) list2.get(2));
+                        System.out.println("The User Friend is :" + list.get(i).getUserFriends());
                         bool = true;
                         return bool;
                     }
                 }
-                System.out.println("The Block List of the User is :"+list.get(i).getBlockList());
-                System.out.println("The UserList Friend After Block is :"+list.get(i).getUserFriends());
+                System.out.println("The Block List of the User is :" + list.get(i).getBlockList());
+                System.out.println("The UserList Friend After Block is :" + list.get(i).getUserFriends());
             }
         }
         return bool;
     }
 
-    private void successfulRequestForRemoveFriend(ArrayList<Object> list2) throws IOException {
+    private void successfulRequestForRemoveFriend(ArrayList<Object> list2, HandleThread thread) throws IOException {
         ArrayList<Object> arrayList = new ArrayList<>();
         arrayList.add(list2.get(0));
         arrayList.add(true);
-        output.writeObject(arrayList);
-        output.flush();
+        thread.getOutput().writeObject(arrayList);
+        thread.getOutput().flush();
+        // output.writeObject(arrayList);
+        // output.flush();
 
     }
 
     private boolean CheckUserListFriendOfUser(ArrayList<Object> list2) {
         boolean bool = false;
-        System.out.println("The User Friends is :" + userProfile.getUserFriends());
-        for (int j = 0; j < userProfile.getUserFriends().size(); j++) {
-            if (list2.get(1).equals(userProfile.getUserFriends().get(j))) {
-                userProfile.getUserFriends().remove(j);
-                bool = true;
-                break;
-            }}
         for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).getEmail().equals(list2.get(1))) {
+            if (list2.get(1).equals(list.get(i).getEmail())) {
+                System.out.println("The User Friends is :" + list.get(i).getUserFriends());
                 for (int j = 0; j < list.get(i).getUserFriends().size(); j++) {
-                    if (list.get(i).getUserFriends().get(j).equals(userProfile.getEmail())) {
+
+                    if (list2.get(2).equals(list.get(i).getUserFriends().get(j))) {
                         list.get(i).getUserFriends().remove(j);
+                        bool = true;
+                        break;
                     }
                 }
+
             }
         }
         return bool;
     }
 
-    private void successfulRequestForEditInfo(ArrayList<Object> list2) throws IOException {
+    private void successfulRequestForEditInfo(ArrayList<Object> list2, HandleThread thread) throws IOException {
         ArrayList<Object> arrayList = new ArrayList<>();
         arrayList.add(list2.get(0));
         arrayList.add(true);
         arrayList.add(list2.get(1));
-        output.writeObject(arrayList);
-        output.flush();
+        thread.getOutput().writeObject(arrayList);
+        thread.getOutput().flush();
 
     }
 
@@ -667,42 +685,58 @@ public class Server {
             if (list.get(i).getEmail().equals(list2.get(1))) {
                 list.get(i).setStory((String) list2.get(3));
                 list.get(i).setName((String) list2.get(2));
-                userProfile = list.get(i);
-                return true;}
-    }
-            return false;}
+                bool = true;
+                break;
+            } else {
+                System.out.println("Login Failed");
+                bool = false;
+            }
 
-    public void successfulRequestForAddFriend(ArrayList<Object> list2) throws IOException {
+        }
+        return bool;
+    }
+
+    public void successfulRequestForAddFriend(ArrayList<Object> list2, HandleThread thread) throws IOException {
         ArrayList<Object> arrayList = new ArrayList<>();
         arrayList.add(list2.get(0));
         arrayList.add(true);
-        output.writeObject(arrayList);
-        output.flush();
+        thread.getOutput().writeObject(arrayList);
+        thread.getOutput().flush();
+        //output.writeObject(arrayList);
+        // output.flush();
     }
 
     public boolean CheckUserListFriend(ArrayList<Object> list2) {
         boolean ans = false;
-        System.out.println("The list friend is :" + userProfile.getUserFriends());
-        boolean bool = userProfile.searchInFriendList((String) list2.get(2));
-        boolean bool2 = userProfile.searchInBlockList((String) list2.get(2));
-        if (bool && !bool2) {
-            System.out.println("This Friend is already exist");
-            ans = false;
+        for (int i = 0; i < list.size(); i++) {
 
-        } else {
-            for (int j = 0; j < list.size(); j++) {
-                if (list2.get(2).equals(list.get(j).getEmail())) {
-                    userProfile.addFriend(list.get(j));
-                    //   System.out.println("The userFriend is :" + list.get(j).getUserFriends());
-                    System.out.println("The friend added");
-                    ans = true;
-                    break;
+            if (list2.get(1).equals(list.get(i).getEmail())) {
+                System.out.println("The list friend is before add:" + list.get(i).getUserFriends());
+                boolean bool = list.get(i).searchInFriendList((String) list2.get(2));
+                boolean bool2 = list.get(i).searchInBlockList((String) list2.get(2));
+                System.out.println("The User Block List :" + list.get(i).getBlockList());
+                if (bool && !bool2) {
+                    System.out.println("This Friend is already exist");
+                    ans = false;
+
+
+                } else if (!bool) {
+                    for (int j = 0; j < list.size(); j++) {
+                        if (list2.get(2).equals(list.get(j).getEmail())) {
+                            list.get(i).addFriend(list.get(j));
+                            System.out.println("The userFriend is after add:" + list.get(i).getUserFriends());
+                            System.out.println("The friend added");
+                            ans = true;
+                            break;
+
+                        }
+                    }
+
                 }
+
             }
-            for (int i = 0; i <list.size(); i++) {
-                if (list.get(i).getEmail().equals(list2.get(1))) {
-                    list.get(i).addFriend(userProfile);
-                }}}
+
+        }
         return ans;
     }
 
@@ -741,15 +775,16 @@ public class Server {
 //>>>>>>> origin/master
         while (true) {
             try {
+
                 WaitForConnection(); //wait someone to connect with me
                 //           SetUpStream();// after one connect with me I Will setup my Stream InputStream and OutPutStream and setup connection
                 //             WhileChatting(); // the programme that will send and receive message
             } catch (EOFException eof) {
                 eof.printStackTrace();
                 System.out.println("Stop:" + "\n" + "The Server End up the Connection...");
-            }/*  finally {
+            } finally {
                 CloseCrap();
-            }*/
+            }
 
         }
     }
@@ -759,9 +794,10 @@ public class Server {
         System.out.println("Waiting for someone to connect...");
         connection = server.accept(); // to accept any one want to chat with you
         HandleThread thread = new HandleThread(connection);
-        onlineUsers.put(thread.getEmail(),thread);
+        onlineUsers.put(thread.getEmail(), thread);
 
     }
+
     //make the stream to send and receive the message
     private void SetUpStream() throws IOException {
 
@@ -790,7 +826,7 @@ public class Server {
         System.out.println(recieveMessage);
         //if(recieveMessage!=)
         //{
-  //      handleRequest(recieveMessage);
+        //      handleRequest(recieveMessage);
         // }
 
         //} while (!message[0].equals("CLIENT - END")); // the while will excite until any one type END then the chat will stop here we deal with Just String
@@ -849,19 +885,19 @@ public class Server {
         ShowMessage("\n Closing Connection...\n");
         // here shut the able to write message
         try {
-            output.close();
-            input.close();
-            connection.close();
+            // output.close();
+            // input.close();
+            //connection.close();
             File emailFile = new File(emailsFileLocation);
-            if(!emailFile.exists())
+            if (!emailFile.exists())
                 emailFile.createNewFile();
 
             File hangeFile = new File(hangedMessagesFileLocation);
-            if(!hangeFile.exists())
+            if (!hangeFile.exists())
                 hangeFile.createNewFile();
 
             File groupFile = new File(groupsFileLocation);
-            if(!groupFile.exists())
+            if (!groupFile.exists())
                 groupFile.createNewFile();
 
 
@@ -881,24 +917,22 @@ public class Server {
             usersWriter.flush();
             groupWriter.flush();
 
-            hangedMessagesWriter.close();
-            usersWriter.close();
-            groupWriter.close();
+            //   hangedMessagesWriter.close();
+            // usersWriter.close();
+            //  groupWriter.close();
 
-            hangeStream.close();
-            usersStream.close();
-            groupStream.close();
+            // hangeStream.close();
+            // usersStream.close();
+            // groupStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
 
-
-
     public class HandleThread extends Thread {
 
-        private  String email = "";
+        private String email = "";
         private ObjectOutputStream output;
         private ObjectInputStream input;
 
@@ -926,14 +960,14 @@ public class Server {
             this.input = input;
         }
 
-        HandleThread(Socket clientSocket)
-        {
+        HandleThread(Socket clientSocket) {
             try {
                 input = new ObjectInputStream(clientSocket.getInputStream());
-                output = new ObjectOutputStream (clientSocket.getOutputStream());
+                output = new ObjectOutputStream(clientSocket.getOutputStream());
                 System.out.println(input.readObject());
                 ArrayList<Object> arrayList = (ArrayList<Object>) input.readObject();
-                handleRequest(arrayList,this);
+                handleRequest(arrayList, this);
+
                 start();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -947,19 +981,16 @@ public class Server {
             super.run();
             ArrayList<Object> arrayList = new ArrayList<>();
 
-            try{
-                while(true)
-                {
+            try {
+                while (true) {
                     arrayList = (ArrayList<Object>) input.readObject();
-                    handleRequest(arrayList,this);
+                    handleRequest(arrayList, this);
+                    CloseCrap();
                 }
-            }
-            catch (EOFException e)
-            {
+            } catch (EOFException e) {
                 onlineUsers.remove(email);
                 System.out.println(email + " Is Offline");
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
