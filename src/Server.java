@@ -206,10 +206,23 @@ public class Server {
         arrayList.add(lists.get(0));
         arrayList.add(true);
         arrayList.add((int) list.size());
+        int postion=0;
+
+        for(int i=0;i<list.size();i++){
+            if(lists.get(1).equals(list.get(i).getEmail())) {
+                postion = i;
+                break;
+            }
+        }
+
         for (int i = 0; i < list.size(); i++) {
             if (!lists.get(1).equals(list.get(i).getEmail())) {
-                arrayList.add(list.get(i).getName());
-                arrayList.add(list.get(i).getEmail());
+                System.out.println("The user Friend is"+list.get(postion).getUserFriends());
+                    if (!list.get(postion).searchInFriendList(list.get(i).getEmail()) && !list.get(postion).searchInBlockList(list.get(i).getEmail())) {
+                        System.out.println("The user add is:"+list.get(i).getEmail());
+                        arrayList.add(list.get(i).getName());
+                        arrayList.add(list.get(i).getEmail());
+                    }
 
             }
         }
