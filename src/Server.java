@@ -171,7 +171,7 @@ public class Server {
             if (list.get(i).getEmail().equals(newList.get(1))) {
                 sendList.add(list.get(i).getName());
                 sendList.add(list.get(i).getUserFriends());
-               // sendList.add(list.get(i).getName());
+                // sendList.add(list.get(i).getName());
                 sendList.add(list.get(i).getBlockList());
                 for (int j = 0; j < list.get(i).getUserFriends().size(); j++) {
                     for (int k = 0; k < list.size(); k++) {
@@ -189,7 +189,7 @@ public class Server {
 
         }
         for (int i = 0; i < list.size(); i++) {
-            if (list!=null &&!list.get(i).getEmail().equals(newList.get(1))) {
+            if (list != null && !list.get(i).getEmail().equals(newList.get(1))) {
                 sendList.add(list.get(i).getName());
                 sendList.add(list.get(i).getEmail());
             }
@@ -206,10 +206,10 @@ public class Server {
         arrayList.add(lists.get(0));
         arrayList.add(true);
         arrayList.add((int) list.size());
-        int postion=0;
+        int postion = 0;
 
-        for(int i=0;i<list.size();i++){
-            if(lists.get(1).equals(list.get(i).getEmail())) {
+        for (int i = 0; i < list.size(); i++) {
+            if (lists.get(1).equals(list.get(i).getEmail())) {
                 postion = i;
                 break;
             }
@@ -217,12 +217,12 @@ public class Server {
 
         for (int i = 0; i < list.size(); i++) {
             if (!lists.get(1).equals(list.get(i).getEmail())) {
-                System.out.println("The user Friend is"+list.get(postion).getUserFriends());
-                    if (!list.get(postion).searchInFriendList(list.get(i).getEmail()) && !list.get(postion).searchInBlockList(list.get(i).getEmail())) {
-                        System.out.println("The user add is:"+list.get(i).getEmail());
-                        arrayList.add(list.get(i).getName());
-                        arrayList.add(list.get(i).getEmail());
-                    }
+                System.out.println("The user Friend is" + list.get(postion).getUserFriends());
+                if (!list.get(postion).searchInFriendList(list.get(i).getEmail()) && !list.get(postion).searchInBlockList(list.get(i).getEmail())) {
+                    System.out.println("The user add is:" + list.get(i).getEmail());
+                    arrayList.add(list.get(i).getName());
+                    arrayList.add(list.get(i).getEmail());
+                }
 
             }
         }
@@ -505,6 +505,14 @@ public class Server {
                 break;
 
             }
+            case 20: { // TTo Send The UnBlock List Of User
+
+                if (list != null) {
+                    SuccessfulUserListFriendBlockSpecific(list2, thread);
+                } else {
+                    rejectRequest(list2, thread);
+                }
+            }
 
             // case 20
 
@@ -556,6 +564,38 @@ public class Server {
                 break;
             }*/
         }
+    }
+
+    private void SuccessfulUserListFriendBlockSpecific(ArrayList<Object> list2, HandleThread thread) throws IOException {
+
+        ArrayList<Object> arrayList = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            if (list2.get(1).equals(list.get(i).getEmail())) {
+                arrayList.add(list2.get(0));
+                arrayList.add(true);
+                if (list.get(i).getBlockList().size() != 0) {
+                    for (int j = 0; j < list.get(i).getBlockList().size(); j++) {
+                        arrayList.add(list.get(i).getBlockList().get(j));
+
+                    }
+                    for (int j = 0; j < list.get(i).getBlockList().size(); j++) {
+
+                        for (int k = 0; k < list.size(); k++) {
+                            if (list.get(k).getEmail().equals(list.get(i).getBlockList().get(j))) {
+                                arrayList.add(list.get(k).getName());
+                                break;
+                            }
+                        }
+
+
+                    }
+                }
+
+            }
+            break;
+        }
+        thread.getOutput().writeObject(arrayList);
+        thread.getOutput().flush();
     }
 
     public void sendMessage2OnlineUser(ArrayList<Object> sendList) {
