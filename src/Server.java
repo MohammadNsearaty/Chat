@@ -738,12 +738,15 @@ public class Server {
             if (list.get(i).getEmail().equals(list2.get(1))) {
                 list.get(i).setStory((String) list2.get(3));
                 list.get(i).setName((String) list2.get(2));
+                System.out.println("The User Story After Update Info is :"+list.get(i).getStory());
+                System.out.println("The User Name After Update Info is :"+list.get(i).getName());
                 bool = true;
                 break;
             } else {
-                System.out.println("Login Failed");
+                System.out.println("Update Failed");
                 bool = false;
             }
+
 
         }
         return bool;
