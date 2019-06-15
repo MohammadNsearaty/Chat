@@ -14,7 +14,7 @@ public class Server {
     private ServerSocket server;
 
     private ArrayList<UserProfile> list = new ArrayList<>();
-    private ArrayList<Message> messagelist;
+    private ArrayList<Message> messagelist = new ArrayList<>();
     private ArrayList<Group> groupsList;
 
     private Socket connection;
@@ -43,10 +43,6 @@ public class Server {
             file2.createNewFile();
         if (!file3.exists())
             file3.createNewFile();
-
-        System.out.println("file1" + file1.exists());
-        System.out.println("file2" + file2.exists());
-        System.out.println("file3" + file3.exists());
 
         FileInputStream emailFile = new FileInputStream(file1);
         FileInputStream messagesFile = new FileInputStream(file2);
