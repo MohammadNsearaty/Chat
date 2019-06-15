@@ -14,7 +14,7 @@ public class Server {
     private ServerSocket server;
 
     private ArrayList<UserProfile> list = new ArrayList<>();
-    private ArrayList<Message> messagelist;
+    private ArrayList<Message> messagelist = new ArrayList<>();
     private ArrayList<Group> groupsList;
 
     private Socket connection;

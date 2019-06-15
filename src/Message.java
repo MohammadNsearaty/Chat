@@ -1,8 +1,9 @@
 import java.awt.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class Message {
+public class Message implements Serializable {
 
     public Message()
     {
