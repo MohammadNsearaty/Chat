@@ -1,12 +1,18 @@
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.ArrayList;
+import java.util.ListIterator;
 
 public class UserProfile implements Serializable {
+
     private String userName;
     private String password;
     private String email;
     private Date birthDate;
+
+    private ArrayList<UserProfile> users;
     private ArrayList<String> userFriends;
     private ArrayList<String> blockList;
     private Date joinDate;
@@ -38,10 +44,9 @@ public class UserProfile implements Serializable {
         this.currMessages = currMessages;
     }
 
-    UserProfile()
-    {
-        userName ="";
-        password ="";
+    UserProfile() {
+        userName = "";
+        password = "";
         email = "";
         birthDate = new Date();
         userFriends = new ArrayList<>();
@@ -51,7 +56,6 @@ public class UserProfile implements Serializable {
         story = "";
     }
 
-
     public String getStory() {
         return story;
     }
@@ -59,8 +63,6 @@ public class UserProfile implements Serializable {
     public void setStory(String story2) {
         story = story2;
     }
-
-
 
     public String getUserId() {
         return userId;
@@ -78,59 +80,76 @@ public class UserProfile implements Serializable {
         this.userName = userName;
     }
 
-    public String getUserPassword() { return password; }
+    public String getUserPassword() {
+        return password;
+    }
 
-    public void setUserPassword(String password){ this.password = password; }
+    public void setUserPassword(String password) {
+        this.password = password;
+    }
 
-
-
-    public boolean addFriend(UserProfile friend){
+    public boolean addFriend(UserProfile friend) {
         boolean searchInFriendList = searchInFriendList(friend.getEmail());
-        if(searchInFriendList)
+        if (searchInFriendList) {
             return true;
-        else {
+        } else {
             userFriends.add(friend.getEmail());
             return true;
         }
     }
-    public boolean deleteFriend(String friendName){
+
+    public boolean deleteFriend(String friendName) {
         boolean searchInFriendList = searchInFriendList(friendName);
-        if(!searchInFriendList)
+        if (!searchInFriendList) {
             return false;
+        }
         userFriends.remove(friendName);
         return true;
     }
-    public boolean blockUser(String name){
+
+    public boolean blockUser(String name) {
         boolean searchInBlockList = searchInBlockList(name);
-        if(searchInBlockList)
+        if (searchInBlockList) {
             return false;
+        }
         blockList.add(name);
-        return true;}
-    public boolean unblockUser(String name){
+        return true;
+    }
+
+    public boolean unblockUser(String name) {
         boolean searchInBlockList = searchInBlockList(name);
-        if(!searchInBlockList)
+        if (!searchInBlockList) {
             return false;
+        }
         blockList.remove(name);
         return true;
     }
-    public boolean searchInFriendList(String email){
-        for(String str:userFriends)
-        {
-            if(str.equals(email))
+
+    public boolean searchInFriendList(String email) {
+        for (String str : userFriends) {
+            if (str.equals(email)) {
                 return true;
+            }
         }
         return false;
     }
-    public boolean searchInBlockList(String name){
-        for(String str:blockList)
-        {
-            if(str.equals(name))
+
+    public boolean searchInBlockList(String name) {
+        for (String str : blockList) {
+            if (str.equals(name)) {
                 return true;
+            }
         }
         return false;
     }
-    public void handleCurrMessages(){}
-    public ArrayList<Message> checkTheServer(){return null;}
+
+    public void handleCurrMessages() {
+    }
+
+    public ArrayList<Message> checkTheServer() {
+        return null;
+    }
+
     public String getUserName() {
         return userName;
     }
@@ -171,5 +190,12 @@ public class UserProfile implements Serializable {
         this.joinDate = joinDate;
     }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public boolean equals(Object o) {
+        return email.equals(((UserProfile) o).email); //To change body of generated methods, choose Tools | Templates.
+    }
 
 }
