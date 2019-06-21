@@ -369,7 +369,7 @@ public class Server {
                     if (bool) {
                         successfulRequestForSignIn(list2, thread);
                         thread.setEmail((String) list2.get(1));
-                        //   onlineUsers.put((String) list2.get(1),thread);
+                        onlineUsers.put((String) list2.get(1),thread);
                     } else {
                         rejectRequest(list2, thread);
                     }
@@ -973,13 +973,13 @@ public class Server {
             usersWriter.flush();
             groupWriter.flush();
 
-            //   hangedMessagesWriter.close();
-            // usersWriter.close();
-            //  groupWriter.close();
+               hangedMessagesWriter.close();
+             usersWriter.close();
+              groupWriter.close();
 
-            // hangeStream.close();
-            // usersStream.close();
-            // groupStream.close();
+             hangeStream.close();
+             usersStream.close();
+             groupStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -1020,7 +1020,7 @@ public class Server {
             try {
                 input = new ObjectInputStream(clientSocket.getInputStream());
                 output = new ObjectOutputStream(clientSocket.getOutputStream());
-                System.out.println(input.readObject());
+             //  System.out.println(input.readObject());
                 ArrayList<Object> arrayList = (ArrayList<Object>) input.readObject();
                 handleRequest(arrayList, this);
 
