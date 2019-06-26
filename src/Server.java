@@ -189,9 +189,14 @@ public class Server {
 
         }
         for (int i = 0; i < list.size(); i++) {
-            if (list != null && !list.get(i).getEmail().equals(newList.get(1))) {
-                sendList.add(list.get(i).getName());
-                sendList.add(list.get(i).getEmail());
+
+            if (list != null && !list.get(i).getEmail().equals(newList.get(1) )) {
+                for(int j=0;j<list.get(i).getUserFriends().size();j++) {
+                    if(!list.get(i).getUserFriends().get(j).equals(list.get(i).getEmail())) {
+                        sendList.add(list.get(i).getName());
+                        sendList.add(list.get(i).getEmail());
+                    }
+                }
             }
         }
         thread.getOutput().writeObject(sendList);
@@ -505,6 +510,16 @@ public class Server {
                 break;
 
             }
+            case 19: { // To Send The UnBlock List Of User
+
+                if (list != null) {
+                    SuccessfulUserLogOut(list2, thread);
+                } else {
+                    rejectRequest(list2, thread);
+                }
+            }
+
+
             case 20: { // To Send The UnBlock List Of User
 
                 if (list != null) {
@@ -564,6 +579,19 @@ public class Server {
                 break;
             }*/
         }
+    }
+
+    private void SuccessfulUserLogOut(ArrayList<Object> list2, HandleThread thread) throws IOException {
+
+        ArrayList<Object> arrayList = new ArrayList<>();
+        String emailuser = (String)list2.get(1);
+        arrayList.add(19);
+        arrayList.add(true);
+        arrayList.add(emailuser);
+        thread.getOutput().writeObject(arrayList);
+        thread.getOutput().flush();
+        onlineUsers.remove(emailuser);
+        System.out.println(emailuser + " Is Offline");
     }
 
     private void SuccessfulUserListFriendBlockSpecific(ArrayList<Object> list2, HandleThread thread) throws IOException {
