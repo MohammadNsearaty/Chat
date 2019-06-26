@@ -505,7 +505,7 @@ public class Server {
                 break;
 
             }
-            case 20: { // TTo Send The UnBlock List Of User
+            case 20: { // To Send The UnBlock List Of User
 
                 if (list != null) {
                     SuccessfulUserListFriendBlockSpecific(list2, thread);
