@@ -188,9 +188,28 @@ public class Server {
             }
 
         }
-        for (int i = 0; i < list.size(); i++) {
+        int postion = 0;
 
-            if (list != null && !list.get(i).getEmail().equals(newList.get(1) )) {
+        for (int i = 0; i < list.size(); i++) {
+            if (newList.get(1).equals(list.get(i).getEmail())) {
+                postion = i;
+                break;
+            }
+        }
+
+        for (int i = 0; i < list.size(); i++) {
+            if (!newList.get(1).equals(list.get(i).getEmail())) {
+                System.out.println("The user Friend is" + list.get(postion).getUserFriends());
+                if (!list.get(postion).searchInFriendList(list.get(i).getEmail()) && !list.get(postion).searchInBlockList(list.get(i).getEmail())) {
+                    System.out.println("The user add is:" + list.get(i).getEmail());
+                    sendList.add(list.get(i).getName());
+                    sendList.add(list.get(i).getEmail());
+                }
+
+            }
+        }
+
+           /* if (list != null && !list.get(i).getEmail().equals(newList.get(1) )) {
                 for(int j=0;j<list.get(i).getUserFriends().size();j++) {
                     if(!list.get(i).getUserFriends().get(j).equals(list.get(i).getEmail())) {
                         sendList.add(list.get(i).getName());
@@ -198,7 +217,7 @@ public class Server {
                     }
                 }
             }
-        }
+        }*/
         thread.getOutput().writeObject(sendList);
         thread.getOutput().flush();
 
@@ -708,6 +727,7 @@ public class Server {
                     if (list.get(i).getUserFriends().get(j).equals(list2.get(2)) && !list.get(i).searchInBlockList((String) list2.get(2))) {
                         list.get(i).blockUser((String) list2.get(2));
                         list.get(i).deleteFriend((String) list2.get(2));
+
                         System.out.println("The User Friend is :" + list.get(i).getUserFriends());
                         bool = true;
                         return bool;
@@ -715,6 +735,9 @@ public class Server {
                 }
                 System.out.println("The Block List of the User is :" + list.get(i).getBlockList());
                 System.out.println("The UserList Friend After Block is :" + list.get(i).getUserFriends());
+            }
+            if (list.get(i).getEmail().equals(list2.get(2))) { // the new add
+                list.get(i).deleteFriend((String) list2.get(1));
             }
         }
         return bool;
@@ -740,11 +763,17 @@ public class Server {
 
                     if (list2.get(2).equals(list.get(i).getUserFriends().get(j))) {
                         list.get(i).getUserFriends().remove(j);
+                  //      list.get(j).getUserFriends().remove(i);
                         bool = true;
                         break;
                     }
+
                 }
 
+                }
+            if(list2.get(2).equals(list.get(i).getEmail())){
+                if(list.get(i).searchInFriendList((String)list2.get(1)))
+                    list.get(i).deleteFriend((String)list2.get(1));
             }
         }
         return bool;
@@ -808,6 +837,8 @@ public class Server {
                     for (int j = 0; j < list.size(); j++) {
                         if (list2.get(2).equals(list.get(j).getEmail())) {
                             list.get(i).addFriend(list.get(j));
+                            list.get(j).addFriend(list.get(i));
+                            list.get(j).getUserFriends();
                             System.out.println("The userFriend is after add:" + list.get(i).getUserFriends());
                             System.out.println("The friend added");
                             ans = true;
