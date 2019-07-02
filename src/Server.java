@@ -538,8 +538,6 @@ public class Server {
                 } else {
                     rejectRequest(list2, thread);
                 }
-
-
                 break;
             }
             case 13: {

@@ -1,16 +1,23 @@
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXListView;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class main extends Application implements EventHandler {
 
@@ -19,7 +26,9 @@ public class main extends Application implements EventHandler {
     Button button = new Button();
     TextField textField = new TextField();
 
-
+    JFXListView<String> listView;
+    JFXButton refresh;
+    VBox vBox;
     static Server server;
 
     static {
@@ -46,9 +55,10 @@ public class main extends Application implements EventHandler {
             }
         });
         thread.start();
-     //   launch(args);
+        launch(args);
 
     }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
 
@@ -77,30 +87,66 @@ public class main extends Application implements EventHandler {
         imageView.setFitWidth(500);
         imageView.setPreserveRatio(true);
 */
+        listView = new JFXListView<>();
+        ArrayList<String> strings = new ArrayList<>(server.onlineUsers.keySet());
+        listView.setCellFactory(lv->new MainCell());
+        listView.setItems(getMessages());
+        refresh = new JFXButton("Refresh");
+
+        refresh.setOnAction(e ->
+        {
+            listView = new JFXListView<>();
+            listView.setCellFactory(lv ->new MainCell());
+            listView.setItems(getMessages());
+            vBox = new VBox(listView , refresh);
+            vBox.setPadding(new Insets(20,20,20,20));
+            Scene scene = new Scene(vBox,300,300);
+
+            primaryStage.setScene(scene);
+            primaryStage.show();
+        });
+        vBox = new VBox(listView , refresh);
+        vBox.resize(listView.getWidth() , listView.getHeight());
+        vBox.setPadding(new Insets(20,20,20,20));
+        Scene scene = new Scene(vBox,300,300);
         primaryStage.setTitle("Server");
 
-        button.setText("Send");
-        button.setOnAction(this::handle);
-        HBox layout = new HBox();
-
-        VBox vBox = new VBox();
-        // vBox.getChildren().add(imageView);
-        // listView.getItems().addAll(server.getList());
-
-
-
-        layout.getChildren().addAll(textField,button);
-        Scene scene = new Scene(layout,300,50);
-        layout.setAlignment(Pos.BOTTOM_CENTER);
 
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
 
+    private ObservableList<String> getMessages() {
+        ArrayList<String> arrayList = new ArrayList(server.onlineUsers.keySet());
+        return FXCollections.observableList(arrayList);
     }
 
     @Override
     public void handle(Event event) {
-        String message = textField.getText();
-      //  server.SendMessage(message);
+
+        //vBox = new VBox(listView , refresh);
+    }
+
+
+    public class MainCell extends ListCell<String> {
+        private Label email;
+        private VBox box;
+
+        public MainCell() {
+            setPrefWidth(100);
+            email = new Label();
+            box = new VBox(email);
+        }
+        @Override
+        protected void updateItem(String message, boolean empty) {
+            super.updateItem(message, empty);
+
+            if (message == "" || empty) {
+                setGraphic(null);
+            } else {
+                email.setText(message);
+                setGraphic(box);
+            }
+        }
     }
 }
