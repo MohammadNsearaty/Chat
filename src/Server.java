@@ -371,6 +371,16 @@ public class Server {
         }
         return null;
     }
+    public ArrayList<Message> checkHangedMessages(String email)
+    {
+        ArrayList<Message> hanged = new ArrayList<>();
+        for(int i = 0; i < messagelist.size() ; i++)
+        {
+            if(messagelist.get(i).getRecieverEmail().equals(email))
+                hanged.add(messagelist.get(i));
+        }
+        return hanged;
+    }
 
     public void handleRequest(ArrayList<Object> list2, HandleThread thread) throws IOException {
         int type = (int) list2.get(0);
@@ -394,6 +404,26 @@ public class Server {
                         successfulRequestForSignIn(list2, thread);
                         thread.setEmail((String) list2.get(1));
                         onlineUsers.put((String) list2.get(1),thread);
+                        ArrayList<Message> hangedMessages = checkHangedMessages((String) list2.get(1));
+                        if(hangedMessages.size() >= 1)
+                        {
+                            Thread sendThread = new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+
+                                    for(int i = 0 ; i < hangedMessages.size() ; i++)
+                                    {
+                                        ArrayList arrayList = new ArrayList();
+                                        arrayList.add(13);
+                                        arrayList.add(hangedMessages.get(i).getSenderEmail());
+                                        arrayList.add(hangedMessages.get(i).getRecieverEmail());
+                                        arrayList.add(hangedMessages.get(i).getSendDate());
+                                        sendMessage2OnlineUser(arrayList);
+                                    }
+                                }
+                            });
+                            sendThread.start();
+                        }
                     } else {
                         rejectRequest(list2, thread);
                     }
@@ -648,7 +678,6 @@ public class Server {
     public void sendMessage2OnlineUser(ArrayList<Object> sendList) {
         String recieverEmail = (String) sendList.get(2);
         HandleThread thread = onlineUsers.get(recieverEmail);
-
         try {
             thread.output.writeObject(sendList);
         } catch (IOException e) {
@@ -883,11 +912,7 @@ public class Server {
 
     //Set Up and run the server
     public void startRunning() throws IOException {
-//<<<<<<< HEAD
         server = new ServerSocket(6790, 101);
-//=======
-        //       server = new ServerSocket(6790, 100);
-//>>>>>>> origin/master
         while (true) {
             try {
 
@@ -1079,7 +1104,7 @@ public class Server {
             try {
                 input = new ObjectInputStream(clientSocket.getInputStream());
                 output = new ObjectOutputStream(clientSocket.getOutputStream());
-             //  System.out.println(input.readObject());
+               System.out.println(input.readObject());
                 ArrayList<Object> arrayList = (ArrayList<Object>) input.readObject();
                 handleRequest(arrayList, this);
 

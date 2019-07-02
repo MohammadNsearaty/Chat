@@ -46,7 +46,7 @@ public class main extends Application implements EventHandler {
             }
         });
         thread.start();
-        launch(args);
+     //   launch(args);
 
     }
     @Override
