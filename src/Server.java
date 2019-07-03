@@ -371,12 +371,11 @@ public class Server {
         }
         return null;
     }
-    public ArrayList<Message> checkHangedMessages(String email)
-    {
+
+    public ArrayList<Message> checkHangedMessages(String email) {
         ArrayList<Message> hanged = new ArrayList<>();
-        for(int i = 0; i < messagelist.size() ; i++)
-        {
-            if(messagelist.get(i).getRecieverEmail().equals(email))
+        for (int i = 0; i < messagelist.size(); i++) {
+            if (messagelist.get(i).getRecieverEmail().equals(email))
                 hanged.add(messagelist.get(i));
         }
         return hanged;
@@ -403,16 +402,14 @@ public class Server {
                     if (bool) {
                         successfulRequestForSignIn(list2, thread);
                         thread.setEmail((String) list2.get(1));
-                        onlineUsers.put((String) list2.get(1),thread);
+                        onlineUsers.put((String) list2.get(1), thread);
                         ArrayList<Message> hangedMessages = checkHangedMessages((String) list2.get(1));
-                        if(hangedMessages.size() >= 1)
-                        {
+                        if (hangedMessages.size() >= 1) {
                             Thread sendThread = new Thread(new Runnable() {
                                 @Override
                                 public void run() {
 
-                                    for(int i = 0 ; i < hangedMessages.size() ; i++)
-                                    {
+                                    for (int i = 0; i < hangedMessages.size(); i++) {
                                         ArrayList arrayList = new ArrayList();
                                         arrayList.add(13);
                                         arrayList.add(hangedMessages.get(i).getSenderEmail());
@@ -631,7 +628,7 @@ public class Server {
     private void SuccessfulUserLogOut(ArrayList<Object> list2, HandleThread thread) throws IOException {
 
         ArrayList<Object> arrayList = new ArrayList<>();
-        String emailuser = (String)list2.get(1);
+        String emailuser = (String) list2.get(1);
         arrayList.add(19);
         arrayList.add(true);
         arrayList.add(emailuser);
@@ -661,8 +658,6 @@ public class Server {
                                 break;
                             }
                         }
-
-
                     }
                 }
 
@@ -675,12 +670,21 @@ public class Server {
 
     public void sendMessage2OnlineUser(ArrayList<Object> sendList) {
         String recieverEmail = (String) sendList.get(2);
-        HandleThread thread = onlineUsers.get(recieverEmail);
-        try {
-            thread.output.writeObject(sendList);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ObjectOutputStream output = onlineUsers.get(recieverEmail).output;
+        System.out.println(sendList + " 13 ");
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    output.writeObject(sendList);
+                    output.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+        thread.start();
     }
 
     public void hangeMessage(ArrayList<Object> hangList) {
@@ -790,17 +794,17 @@ public class Server {
 
                     if (list2.get(2).equals(list.get(i).getUserFriends().get(j))) {
                         list.get(i).getUserFriends().remove(j);
-                  //      list.get(j).getUserFriends().remove(i);
+                        //      list.get(j).getUserFriends().remove(i);
                         bool = true;
                         break;
                     }
 
                 }
 
-                }
-            if(list2.get(2).equals(list.get(i).getEmail())){
-                if(list.get(i).searchInFriendList((String)list2.get(1)))
-                    list.get(i).deleteFriend((String)list2.get(1));
+            }
+            if (list2.get(2).equals(list.get(i).getEmail())) {
+                if (list.get(i).searchInFriendList((String) list2.get(1)))
+                    list.get(i).deleteFriend((String) list2.get(1));
             }
         }
         return bool;
@@ -822,8 +826,8 @@ public class Server {
             if (list.get(i).getEmail().equals(list2.get(1))) {
                 list.get(i).setStory((String) list2.get(3));
                 list.get(i).setName((String) list2.get(2));
-                System.out.println("The User Story After Update Info is :"+list.get(i).getStory());
-                System.out.println("The User Name After Update Info is :"+list.get(i).getName());
+                System.out.println("The User Story After Update Info is :" + list.get(i).getStory());
+                System.out.println("The User Name After Update Info is :" + list.get(i).getName());
                 bool = true;
                 break;
             } else {
@@ -1055,13 +1059,13 @@ public class Server {
             usersWriter.flush();
             groupWriter.flush();
 
-               hangedMessagesWriter.close();
-             usersWriter.close();
-              groupWriter.close();
+            hangedMessagesWriter.close();
+            usersWriter.close();
+            groupWriter.close();
 
-             hangeStream.close();
-             usersStream.close();
-             groupStream.close();
+            hangeStream.close();
+            usersStream.close();
+            groupStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -1102,7 +1106,7 @@ public class Server {
             try {
                 input = new ObjectInputStream(clientSocket.getInputStream());
                 output = new ObjectOutputStream(clientSocket.getOutputStream());
-               System.out.println(input.readObject());
+                System.out.println(input.readObject());
                 ArrayList<Object> arrayList = (ArrayList<Object>) input.readObject();
                 handleRequest(arrayList, this);
 
