@@ -1,5 +1,6 @@
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXListView;
+import com.jfoenix.controls.JFXTextField;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -14,6 +15,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,11 +26,11 @@ public class main extends Application implements EventHandler {
 
     ArrayList<String> arrayList = new ArrayList<>();
 
-    Button button = new Button();
-    TextField textField = new TextField();
 
     JFXListView<String> listView;
     JFXButton refresh;
+    JFXButton send;
+    JFXTextField textField;
     VBox vBox;
     static Server server;
 
@@ -92,20 +95,50 @@ public class main extends Application implements EventHandler {
         listView.setCellFactory(lv->new MainCell());
         listView.setItems(getMessages());
         refresh = new JFXButton("Refresh");
-
+        send = new JFXButton("Send Message");
+        textField = new JFXTextField("");
+       textField.setPromptText("TYPE A MESSAGE");
+       send.setOnAction(e ->
+       {
+           String message = textField.getText();
+           ObservableList<String> list = listView.getSelectionModel().getSelectedItems();
+           for(String mail : list)
+           {
+               Server.HandleThread handleThread = server.onlineUsers.get(mail);
+               if(handleThread != null) {
+                   Thread thread = new Thread(new Runnable() {
+                       @Override
+                       public void run() {
+                           try {
+                               ArrayList<Object> arrayList = new ArrayList<>();
+                               arrayList.add(100);
+                               arrayList.add(message);
+                               handleThread.getOutput().writeObject(arrayList);
+                               handleThread.getOutput().flush();
+                           } catch (IOException ex) {
+                               ex.printStackTrace();
+                           }
+                       }
+                   });
+                   thread.start();
+               }
+           }
+       });
         refresh.setOnAction(e ->
         {
             listView = new JFXListView<>();
+            listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
             listView.setCellFactory(lv ->new MainCell());
             listView.setItems(getMessages());
-            vBox = new VBox(listView , refresh);
+            vBox = new VBox(listView , new HBox(refresh,send) ,textField);
+
             vBox.setPadding(new Insets(20,20,20,20));
             Scene scene = new Scene(vBox,300,300);
 
             primaryStage.setScene(scene);
             primaryStage.show();
         });
-        vBox = new VBox(listView , refresh);
+        vBox = new VBox(listView , new HBox(refresh,send) ,textField);
         vBox.resize(listView.getWidth() , listView.getHeight());
         vBox.setPadding(new Insets(20,20,20,20));
         Scene scene = new Scene(vBox,300,300);

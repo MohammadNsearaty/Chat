@@ -675,12 +675,20 @@ public class Server {
 
     public void sendMessage2OnlineUser(ArrayList<Object> sendList) {
         String recieverEmail = (String) sendList.get(2);
-        HandleThread thread = onlineUsers.get(recieverEmail);
-        try {
-            thread.output.writeObject(sendList);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Thread outputThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                HandleThread connectThread= onlineUsers.get(recieverEmail);
+                try {
+
+                    connectThread.output.writeObject(sendList);
+                    connectThread.output.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        outputThread.start();
     }
 
     public void hangeMessage(ArrayList<Object> hangList) {
@@ -933,7 +941,6 @@ public class Server {
         connection = server.accept(); // to accept any one want to chat with you
         HandleThread thread = new HandleThread(connection);
         onlineUsers.put(thread.getEmail(), thread);
-
     }
 
     //make the stream to send and receive the message
@@ -1073,6 +1080,15 @@ public class Server {
         private String email = "";
         private ObjectOutputStream output;
         private ObjectInputStream input;
+        private Socket connection;
+
+        public Socket getConnection() {
+            return connection;
+        }
+
+        public void setConnection(Socket connection) {
+            this.connection = connection;
+        }
 
         public String getEmail() {
             return email;
@@ -1100,6 +1116,7 @@ public class Server {
 
         HandleThread(Socket clientSocket) {
             try {
+                connection = clientSocket;
                 input = new ObjectInputStream(clientSocket.getInputStream());
                 output = new ObjectOutputStream(clientSocket.getOutputStream());
                System.out.println(input.readObject());
@@ -1118,7 +1135,6 @@ public class Server {
         public void run() {
             super.run();
             ArrayList<Object> arrayList = new ArrayList<>();
-
             try {
                 while (true) {
                     arrayList = (ArrayList<Object>) input.readObject();
