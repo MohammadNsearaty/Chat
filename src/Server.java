@@ -99,13 +99,13 @@ public class Server {
     public boolean addUser(UserProfile user) {
         if (list == null) {
             list.add(user);
-        } else {
+        }
             for (int i = 0; i < list.size(); i++) {
                 if (list.get(i).getEmail().equals(user.getEmail()))
                     return false;
             }
             list.add(user);
-        }
+
         System.out.println("list is: ababa" + list.toString());  ///////////
         return true;
     }
@@ -543,20 +543,52 @@ public class Server {
             case 13: {
                 String recieverEmail = (String) list2.get(2);
                 boolean res = false;
-                System.out.println(list2);
-                for (String email : onlineUsers.keySet())
-                    if (email.equals(recieverEmail)) {
-                        res = true;
-                        break;
+                UserProfile tmp;
+                UserProfile tmp2;
+                boolean blocked = false;
+                for(int i = 0 ; i < list.size(); i++)
+                {
+                    if(list.get(i).getEmail().equals(recieverEmail))
+                    {
+                        for(int j = 0 ; j < list.get(i).getBlockList().size();j++)
+                        {
+                            for(int k = 0 ; k <list.size(); k++)
+                                if(list.get(k).getEmail().equals(list.get(i).getBlockList().get(j)))
+                                    blocked = true;
+
+                        }
                     }
-                if (res) {
-                    sendMessage2OnlineUser(list2);
-                } else {
-                    hangeMessage(list2);
+
+                }
+                System.out.println(list2);
+                if(!blocked) {
+                    for (String email : onlineUsers.keySet())
+                        if (email.equals(recieverEmail)) {
+                            res = true;
+                            break;
+                        }
+                    if (res) {
+                        sendMessage2OnlineUser(list2);
+                    } else {
+                        hangeMessage(list2);
+                    }
                 }
                 break;
 
             }
+            case 14: {
+                boolean bool = CheckUserBlock(list2);
+
+                if (bool) {
+                    successfulCheckUserBlock(list2, thread);
+                } else {
+                    rejectRequest(list2, thread);
+                }
+
+                break;
+
+            }
+
             case 19: { // To Send The UnBlock List Of User
 
                 if (list != null) {
@@ -640,6 +672,27 @@ public class Server {
         onlineUsers.remove(emailuser);
         System.out.println(emailuser + " Is Offline");
     }
+
+    private void successfulCheckUserBlock(ArrayList<Object> list2, HandleThread thread) throws IOException {
+        ArrayList<Object> arrayList = new ArrayList<>();
+        arrayList.add(list2.get(0));
+        arrayList.add(true);
+        thread.getOutput().writeObject(arrayList);
+        thread.getOutput().flush();
+    }
+
+    private boolean CheckUserBlock(ArrayList<Object> list2) {
+        boolean bool = false;
+        for(int i =0 ; i<list.size() ; i++){
+            if(list.get(i).getEmail().equals(list2.get(1))){
+                if(list.get(i).searchInBlockList((String)list2.get(2))){
+                    bool = true;
+                }
+            }
+        }
+        return bool;
+    }
+
 
     private void SuccessfulUserListFriendBlockSpecific(ArrayList<Object> list2, HandleThread thread) throws IOException {
 

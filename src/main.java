@@ -111,7 +111,9 @@ public class main extends Application implements EventHandler {
                        public void run() {
                            try {
                                ArrayList<Object> arrayList = new ArrayList<>();
-                               arrayList.add(100);
+                               arrayList.add(13);
+                               arrayList.add("Server");
+                               arrayList.add(mail);
                                arrayList.add(message);
                                handleThread.getOutput().writeObject(arrayList);
                                handleThread.getOutput().flush();
